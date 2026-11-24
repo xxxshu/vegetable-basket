@@ -1,0 +1,5 @@
+# pnpm 12 起，依赖构建脚本的白名单等设置放在这里（package.json 的 pnpm 字段已不再被读取）。
+# allowBuilds：pnpm 默认拦截依赖的安装脚本；@parcel/watcher 是 sass / Vite 的文件监听依赖，
+# 需要显式放行，否则 pnpm install 会以 ERR_PNPM_IGNORED_BUILDS 报错退出。
+allowBuilds:
+  '@parcel/watcher': true
