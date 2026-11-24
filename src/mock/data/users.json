@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "username": "family",
+    "password": "123456",
+    "nickname": "家庭用户",
+    "avatar": "",
+    "role": "family",
+    "status": 1
+  },
+  {
+    "id": 2,
+    "username": "admin",
+    "password": "123456",
+    "nickname": "系统管理员",
+    "avatar": "",
+    "role": "admin",
+    "status": 1
+  }
+]

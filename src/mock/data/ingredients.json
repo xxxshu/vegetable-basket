@@ -1,0 +1,677 @@
+[
+  {
+    "id": 1,
+    "name": "番茄",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 700,
+    "aliases": ["西红柿"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 2,
+    "name": "土豆",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 400,
+    "aliases": ["马铃薯"],
+    "shelfLifeDays": 30
+  },
+  {
+    "id": 3,
+    "name": "黄瓜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 500,
+    "aliases": ["青瓜"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 4,
+    "name": "青椒",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 600,
+    "aliases": ["柿子椒", "灯笼椒"],
+    "shelfLifeDays": 10
+  },
+  {
+    "id": 5,
+    "name": "尖椒",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 700,
+    "aliases": ["辣椒"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 6,
+    "name": "西兰花",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 900,
+    "aliases": [],
+    "shelfLifeDays": 5
+  },
+  {
+    "id": 7,
+    "name": "茄子",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 500,
+    "aliases": ["紫茄"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 8,
+    "name": "四季豆",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 800,
+    "aliases": ["豆角", "芸豆"],
+    "shelfLifeDays": 5
+  },
+  {
+    "id": 9,
+    "name": "包菜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 300,
+    "aliases": ["卷心菜", "圆白菜"],
+    "shelfLifeDays": 15
+  },
+  {
+    "id": 10,
+    "name": "白萝卜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 300,
+    "aliases": ["萝卜"],
+    "shelfLifeDays": 20
+  },
+  {
+    "id": 11,
+    "name": "胡萝卜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 400,
+    "aliases": ["红萝卜"],
+    "shelfLifeDays": 20
+  },
+  {
+    "id": 12,
+    "name": "洋葱",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 400,
+    "aliases": ["圆葱"],
+    "shelfLifeDays": 30
+  },
+  {
+    "id": 13,
+    "name": "韭菜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 600,
+    "aliases": [],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 14,
+    "name": "冬瓜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 300,
+    "aliases": [],
+    "shelfLifeDays": 10
+  },
+  {
+    "id": 15,
+    "name": "香菇",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 1600,
+    "aliases": ["冬菇"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 16,
+    "name": "金针菇",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 1200,
+    "aliases": ["金菇"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 17,
+    "name": "菠菜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 800,
+    "aliases": [],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 18,
+    "name": "南瓜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 400,
+    "aliases": [],
+    "shelfLifeDays": 15
+  },
+  {
+    "id": 19,
+    "name": "苦瓜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 700,
+    "aliases": ["凉瓜"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 20,
+    "name": "莲藕",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 800,
+    "aliases": ["藕"],
+    "shelfLifeDays": 10
+  },
+  {
+    "id": 21,
+    "name": "芹菜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 600,
+    "aliases": ["西芹"],
+    "shelfLifeDays": 7
+  },
+  {
+    "id": 22,
+    "name": "青菜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 500,
+    "aliases": ["上海青", "油菜"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 23,
+    "name": "小米椒",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 3000,
+    "aliases": ["朝天椒"],
+    "shelfLifeDays": 15
+  },
+  {
+    "id": 24,
+    "name": "香菜",
+    "categoryId": 1,
+    "unitBase": "g",
+    "pricePerUnit": 800,
+    "aliases": ["芫荽"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 25,
+    "name": "猪五花",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 3500,
+    "aliases": ["五花肉"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 26,
+    "name": "猪肉末",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 3000,
+    "aliases": ["肉馅", "猪绞肉"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 27,
+    "name": "里脊肉",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 3800,
+    "aliases": ["猪里脊"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 28,
+    "name": "鸡胸肉",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 2000,
+    "aliases": [],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 29,
+    "name": "鸡翅中",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 4000,
+    "aliases": ["鸡翅", "翅中"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 30,
+    "name": "牛腩",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 5500,
+    "aliases": ["牛肋肉"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 31,
+    "name": "排骨",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 4000,
+    "aliases": ["猪排骨"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 32,
+    "name": "羊肉",
+    "categoryId": 2,
+    "unitBase": "g",
+    "pricePerUnit": 7000,
+    "aliases": ["羊腿肉"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 33,
+    "name": "鲈鱼",
+    "categoryId": 3,
+    "unitBase": "g",
+    "pricePerUnit": 3000,
+    "aliases": ["海鲈鱼"],
+    "shelfLifeDays": 2
+  },
+  {
+    "id": 34,
+    "name": "基围虾",
+    "categoryId": 3,
+    "unitBase": "g",
+    "pricePerUnit": 6000,
+    "aliases": ["虾", "明虾"],
+    "shelfLifeDays": 2
+  },
+  {
+    "id": 35,
+    "name": "扇贝",
+    "categoryId": 3,
+    "unitBase": "g",
+    "pricePerUnit": 4000,
+    "aliases": ["带子"],
+    "shelfLifeDays": 2
+  },
+  {
+    "id": 36,
+    "name": "鱿鱼",
+    "categoryId": 3,
+    "unitBase": "g",
+    "pricePerUnit": 4000,
+    "aliases": ["鱿鱼须"],
+    "shelfLifeDays": 2
+  },
+  {
+    "id": 37,
+    "name": "紫菜",
+    "categoryId": 3,
+    "unitBase": "g",
+    "pricePerUnit": 6000,
+    "aliases": [],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 38,
+    "name": "鸡蛋",
+    "categoryId": 4,
+    "unitBase": "个",
+    "pricePerUnit": 100,
+    "aliases": ["蛋", "土鸡蛋"],
+    "shelfLifeDays": 30
+  },
+  {
+    "id": 39,
+    "name": "牛奶",
+    "categoryId": 4,
+    "unitBase": "ml",
+    "pricePerUnit": 300,
+    "aliases": [],
+    "shelfLifeDays": 10
+  },
+  {
+    "id": 40,
+    "name": "大米",
+    "categoryId": 5,
+    "unitBase": "g",
+    "pricePerUnit": 600,
+    "aliases": ["米"],
+    "shelfLifeDays": 180
+  },
+  {
+    "id": 41,
+    "name": "小米",
+    "categoryId": 5,
+    "unitBase": "g",
+    "pricePerUnit": 700,
+    "aliases": [],
+    "shelfLifeDays": 180
+  },
+  {
+    "id": 42,
+    "name": "面粉",
+    "categoryId": 5,
+    "unitBase": "g",
+    "pricePerUnit": 500,
+    "aliases": ["小麦粉"],
+    "shelfLifeDays": 180
+  },
+  {
+    "id": 43,
+    "name": "挂面",
+    "categoryId": 5,
+    "unitBase": "g",
+    "pricePerUnit": 800,
+    "aliases": ["面条"],
+    "shelfLifeDays": 180
+  },
+  {
+    "id": 44,
+    "name": "馒头",
+    "categoryId": 5,
+    "unitBase": "个",
+    "pricePerUnit": 100,
+    "aliases": [],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 45,
+    "name": "米饭",
+    "categoryId": 5,
+    "unitBase": "g",
+    "pricePerUnit": 300,
+    "aliases": ["剩米饭", "白饭"],
+    "shelfLifeDays": 1
+  },
+  {
+    "id": 46,
+    "name": "食用油",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 1200,
+    "aliases": ["油", "色拉油", "花生油"],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 47,
+    "name": "盐",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 300,
+    "aliases": ["食盐"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 48,
+    "name": "白糖",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 800,
+    "aliases": ["糖", "白砂糖"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 49,
+    "name": "生抽",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 1600,
+    "aliases": ["酱油"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 50,
+    "name": "老抽",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 1800,
+    "aliases": [],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 51,
+    "name": "醋",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 1000,
+    "aliases": ["香醋", "米醋"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 52,
+    "name": "料酒",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 1200,
+    "aliases": ["黄酒"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 53,
+    "name": "蚝油",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 2400,
+    "aliases": [],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 54,
+    "name": "胡椒粉",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 15000,
+    "aliases": ["白胡椒", "黑胡椒"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 55,
+    "name": "淀粉",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 1000,
+    "aliases": ["生粉", "玉米淀粉"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 56,
+    "name": "花椒",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 20000,
+    "aliases": ["花椒粒"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 57,
+    "name": "干辣椒",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 20000,
+    "aliases": ["辣椒干"],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 58,
+    "name": "豆瓣酱",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 3000,
+    "aliases": ["郫县豆瓣"],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 59,
+    "name": "番茄酱",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 2500,
+    "aliases": [],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 60,
+    "name": "香油",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 4000,
+    "aliases": ["芝麻油"],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 61,
+    "name": "孜然粉",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 18000,
+    "aliases": [],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 62,
+    "name": "鸡精",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 5000,
+    "aliases": [],
+    "shelfLifeDays": 730
+  },
+  {
+    "id": 63,
+    "name": "蒸鱼豉油",
+    "categoryId": 6,
+    "unitBase": "ml",
+    "pricePerUnit": 2000,
+    "aliases": [],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 64,
+    "name": "大葱",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 500,
+    "aliases": ["葱"],
+    "shelfLifeDays": 10
+  },
+  {
+    "id": 65,
+    "name": "生姜",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 1600,
+    "aliases": ["姜"],
+    "shelfLifeDays": 30
+  },
+  {
+    "id": 66,
+    "name": "大蒜",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 1500,
+    "aliases": ["蒜"],
+    "shelfLifeDays": 30
+  },
+  {
+    "id": 67,
+    "name": "白芝麻",
+    "categoryId": 6,
+    "unitBase": "g",
+    "pricePerUnit": 12000,
+    "aliases": ["芝麻"],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 68,
+    "name": "豆腐",
+    "categoryId": 7,
+    "unitBase": "个",
+    "pricePerUnit": 250,
+    "aliases": ["北豆腐", "南豆腐"],
+    "shelfLifeDays": 3
+  },
+  {
+    "id": 69,
+    "name": "粉丝",
+    "categoryId": 7,
+    "unitBase": "g",
+    "pricePerUnit": 2000,
+    "aliases": ["龙口粉丝"],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 70,
+    "name": "木耳",
+    "categoryId": 7,
+    "unitBase": "g",
+    "pricePerUnit": 8000,
+    "aliases": ["黑木耳"],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 71,
+    "name": "腐竹",
+    "categoryId": 7,
+    "unitBase": "g",
+    "pricePerUnit": 5000,
+    "aliases": [],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 72,
+    "name": "红枣",
+    "categoryId": 7,
+    "unitBase": "g",
+    "pricePerUnit": 5000,
+    "aliases": [],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 73,
+    "name": "枸杞",
+    "categoryId": 7,
+    "unitBase": "g",
+    "pricePerUnit": 12000,
+    "aliases": [],
+    "shelfLifeDays": 365
+  },
+  {
+    "id": 74,
+    "name": "可乐",
+    "categoryId": 7,
+    "unitBase": "ml",
+    "pricePerUnit": 600,
+    "aliases": [],
+    "shelfLifeDays": 180
+  },
+  {
+    "id": 75,
+    "name": "花生米",
+    "categoryId": 7,
+    "unitBase": "g",
+    "pricePerUnit": 1600,
+    "aliases": ["花生"],
+    "shelfLifeDays": 180
+  }
+]

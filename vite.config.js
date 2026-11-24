@@ -7,6 +7,30 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
+// 开发期 /api 兜底：Mock 关闭且还没接真实后端时，接口请求直接返回 404 JSON。
+// 为什么需要：Vite 对未知的 GET 请求会做 SPA fallback（返回 index.html），
+// /api 请求会被当成页面请求返回 200 HTML，导致无法验证"关闭 Mock 后请求确实发到了网络"。
+// 接入真实后端时可删除本插件（或改用 server.proxy 转发到后端）。
+function devApiNotFoundPlugin() {
+  return {
+    name: 'dev-api-not-found',
+    // apply: 'serve' 表示只在 pnpm dev 时生效，构建生产包时自动跳过
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        // 只拦截接口前缀，其它请求继续交给 Vite 处理（页面、静态资源、HMR 等）
+        if (req.url && req.url.startsWith('/api/')) {
+          res.statusCode = 404
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(JSON.stringify({ code: 404, message: '接口不存在：当前未配置真实后端' }))
+          return
+        }
+        next()
+      })
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -25,6 +49,7 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
       dts: false,
     }),
+    devApiNotFoundPlugin(),
   ],
   resolve: {
     alias: {

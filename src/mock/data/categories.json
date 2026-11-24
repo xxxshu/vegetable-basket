@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "name": "蔬菜",
+    "type": "ingredient",
+    "sort": 1
+  },
+  {
+    "id": 2,
+    "name": "肉禽",
+    "type": "ingredient",
+    "sort": 2
+  },
+  {
+    "id": 3,
+    "name": "水产",
+    "type": "ingredient",
+    "sort": 3
+  },
+  {
+    "id": 4,
+    "name": "蛋奶",
+    "type": "ingredient",
+    "sort": 4
+  },
+  {
+    "id": 5,
+    "name": "主食",
+    "type": "ingredient",
+    "sort": 5
+  },
+  {
+    "id": 6,
+    "name": "调味",
+    "type": "ingredient",
+    "sort": 6
+  },
+  {
+    "id": 7,
+    "name": "其他",
+    "type": "ingredient",
+    "sort": 7
+  },
+  {
+    "id": 101,
+    "name": "炒",
+    "type": "method",
+    "sort": 1
+  },
+  {
+    "id": 102,
+    "name": "炖煮",
+    "type": "method",
+    "sort": 2
+  },
+  {
+    "id": 103,
+    "name": "蒸",
+    "type": "method",
+    "sort": 3
+  },
+  {
+    "id": 104,
+    "name": "炸煎",
+    "type": "method",
+    "sort": 4
+  },
+  {
+    "id": 105,
+    "name": "烤",
+    "type": "method",
+    "sort": 5
+  },
+  {
+    "id": 106,
+    "name": "凉拌",
+    "type": "method",
+    "sort": 6
+  },
+  {
+    "id": 107,
+    "name": "汤羹",
+    "type": "method",
+    "sort": 7
+  },
+  {
+    "id": 108,
+    "name": "主食",
+    "type": "method",
+    "sort": 8
+  }
+]

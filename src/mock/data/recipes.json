@@ -1,0 +1,3065 @@
+[
+  {
+    "id": 1,
+    "title": "番茄炒蛋",
+    "cover": "",
+    "description": "酸甜开胃的国民家常菜，十分钟就能上桌。",
+    "categoryId": 4,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 230,
+    "protein": 14,
+    "fat": 15,
+    "carb": 9,
+    "fiber": 1.5,
+    "sodium": 480,
+    "timeMin": 10,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 1,
+        "recipeId": 1,
+        "ingredientId": 1,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 2,
+        "recipeId": 1,
+        "ingredientId": 38,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 3,
+        "recipeId": 1,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": true
+      },
+      {
+        "id": 4,
+        "recipeId": 1,
+        "ingredientId": 48,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 5,
+        "recipeId": 1,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 6,
+        "recipeId": 1,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 1,
+        "recipeId": 1,
+        "order": 1,
+        "content": "番茄切块，鸡蛋加少许盐打散",
+        "durationMin": 3
+      },
+      {
+        "id": 2,
+        "recipeId": 1,
+        "order": 2,
+        "content": "热锅倒油，倒入蛋液炒至定型后盛出",
+        "durationMin": 2
+      },
+      {
+        "id": 3,
+        "recipeId": 1,
+        "order": 3,
+        "content": "余油下番茄炒出汁水",
+        "durationMin": 3
+      },
+      {
+        "id": 4,
+        "recipeId": 1,
+        "order": 4,
+        "content": "倒回鸡蛋，加白糖和盐翻炒均匀",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "红烧肉",
+    "cover": "",
+    "description": "肥而不腻、入口即化的经典硬菜，宴客必备。",
+    "categoryId": 2,
+    "method": "炖煮",
+    "difficulty": 2,
+    "calories": 520,
+    "protein": 22,
+    "fat": 42,
+    "carb": 12,
+    "fiber": 0.5,
+    "sodium": 900,
+    "timeMin": 65,
+    "baseServings": 3,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 7,
+        "recipeId": 2,
+        "ingredientId": 25,
+        "amount": 600,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 8,
+        "recipeId": 2,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 9,
+        "recipeId": 2,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 10,
+        "recipeId": 2,
+        "ingredientId": 48,
+        "amount": 20,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 11,
+        "recipeId": 2,
+        "ingredientId": 49,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 12,
+        "recipeId": 2,
+        "ingredientId": 50,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 13,
+        "recipeId": 2,
+        "ingredientId": 52,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 5,
+        "recipeId": 2,
+        "order": 1,
+        "content": "五花肉切块冷水下锅，加料酒焯水后捞出",
+        "durationMin": 8
+      },
+      {
+        "id": 6,
+        "recipeId": 2,
+        "order": 2,
+        "content": "锅中放白糖，小火炒出糖色",
+        "durationMin": 3
+      },
+      {
+        "id": 7,
+        "recipeId": 2,
+        "order": 3,
+        "content": "下五花肉翻炒上色，加葱姜炒香",
+        "durationMin": 4
+      },
+      {
+        "id": 8,
+        "recipeId": 2,
+        "order": 4,
+        "content": "加生抽、老抽和热水没过肉，小火炖 45 分钟",
+        "durationMin": 45
+      },
+      {
+        "id": 9,
+        "recipeId": 2,
+        "order": 5,
+        "content": "大火收汁至浓稠",
+        "durationMin": 5
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "宫保鸡丁",
+    "cover": "",
+    "description": "糊辣荔枝味，鸡丁滑嫩、花生酥脆，下饭神器。",
+    "categoryId": 2,
+    "method": "炒",
+    "difficulty": 2,
+    "calories": 380,
+    "protein": 28,
+    "fat": 22,
+    "carb": 15,
+    "fiber": 2,
+    "sodium": 820,
+    "timeMin": 25,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 14,
+        "recipeId": 3,
+        "ingredientId": 28,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 15,
+        "recipeId": 3,
+        "ingredientId": 3,
+        "amount": 100,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 16,
+        "recipeId": 3,
+        "ingredientId": 75,
+        "amount": 50,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 17,
+        "recipeId": 3,
+        "ingredientId": 57,
+        "amount": 3,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 18,
+        "recipeId": 3,
+        "ingredientId": 56,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 19,
+        "recipeId": 3,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 20,
+        "recipeId": 3,
+        "ingredientId": 51,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 21,
+        "recipeId": 3,
+        "ingredientId": 48,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 22,
+        "recipeId": 3,
+        "ingredientId": 55,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 23,
+        "recipeId": 3,
+        "ingredientId": 46,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 10,
+        "recipeId": 3,
+        "order": 1,
+        "content": "鸡胸肉切丁，加生抽和淀粉抓匀腌 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 11,
+        "recipeId": 3,
+        "order": 2,
+        "content": "调碗汁：生抽、醋、白糖、淀粉加少许水拌匀",
+        "durationMin": 2
+      },
+      {
+        "id": 12,
+        "recipeId": 3,
+        "order": 3,
+        "content": "热油下鸡丁滑炒至变色盛出",
+        "durationMin": 3
+      },
+      {
+        "id": 13,
+        "recipeId": 3,
+        "order": 4,
+        "content": "余油爆香干辣椒和花椒，下黄瓜丁和鸡丁，倒入碗汁炒匀，撒花生米",
+        "durationMin": 5
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "清蒸鲈鱼",
+    "cover": "",
+    "description": "少油高蛋白，鱼肉鲜嫩，健身餐也可以吃。",
+    "categoryId": 3,
+    "method": "蒸",
+    "difficulty": 2,
+    "calories": 260,
+    "protein": 32,
+    "fat": 10,
+    "carb": 6,
+    "fiber": 0.5,
+    "sodium": 600,
+    "timeMin": 25,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 24,
+        "recipeId": 4,
+        "ingredientId": 33,
+        "amount": 500,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 25,
+        "recipeId": 4,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 26,
+        "recipeId": 4,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 27,
+        "recipeId": 4,
+        "ingredientId": 52,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 28,
+        "recipeId": 4,
+        "ingredientId": 63,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 29,
+        "recipeId": 4,
+        "ingredientId": 46,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 14,
+        "recipeId": 4,
+        "order": 1,
+        "content": "鲈鱼处理干净，两面划刀，抹料酒和姜片腌 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 15,
+        "recipeId": 4,
+        "order": 2,
+        "content": "水开后上锅大火蒸 8 分钟",
+        "durationMin": 8
+      },
+      {
+        "id": 16,
+        "recipeId": 4,
+        "order": 3,
+        "content": "取出倒掉汤汁，铺上葱丝，淋蒸鱼豉油",
+        "durationMin": 2
+      },
+      {
+        "id": 17,
+        "recipeId": 4,
+        "order": 4,
+        "content": "热油浇在葱丝上激出香味",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "麻婆豆腐",
+    "cover": "",
+    "description": "麻辣鲜香烫，一勺豆瓣酱成就的川味经典。",
+    "categoryId": 7,
+    "method": "炖煮",
+    "difficulty": 2,
+    "calories": 320,
+    "protein": 16,
+    "fat": 22,
+    "carb": 12,
+    "fiber": 1.5,
+    "sodium": 780,
+    "timeMin": 20,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 30,
+        "recipeId": 5,
+        "ingredientId": 68,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 31,
+        "recipeId": 5,
+        "ingredientId": 26,
+        "amount": 100,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 32,
+        "recipeId": 5,
+        "ingredientId": 58,
+        "amount": 20,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 33,
+        "recipeId": 5,
+        "ingredientId": 56,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 34,
+        "recipeId": 5,
+        "ingredientId": 66,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 35,
+        "recipeId": 5,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 36,
+        "recipeId": 5,
+        "ingredientId": 55,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 37,
+        "recipeId": 5,
+        "ingredientId": 46,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 18,
+        "recipeId": 5,
+        "order": 1,
+        "content": "豆腐切块，用淡盐水浸泡 5 分钟后沥干",
+        "durationMin": 5
+      },
+      {
+        "id": 19,
+        "recipeId": 5,
+        "order": 2,
+        "content": "热油炒香肉末，加豆瓣酱、蒜姜炒出红油",
+        "durationMin": 4
+      },
+      {
+        "id": 20,
+        "recipeId": 5,
+        "order": 3,
+        "content": "加水烧开，下豆腐轻推煮 5 分钟",
+        "durationMin": 5
+      },
+      {
+        "id": 21,
+        "recipeId": 5,
+        "order": 4,
+        "content": "淋水淀粉勾芡，撒花椒粉",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "青椒土豆丝",
+    "cover": "",
+    "description": "清脆爽口的快手素菜，厨房新手的第一道菜。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 180,
+    "protein": 4,
+    "fat": 9,
+    "carb": 23,
+    "fiber": 2,
+    "sodium": 560,
+    "timeMin": 15,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 38,
+        "recipeId": 6,
+        "ingredientId": 2,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 39,
+        "recipeId": 6,
+        "ingredientId": 4,
+        "amount": 100,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 40,
+        "recipeId": 6,
+        "ingredientId": 23,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": true
+      },
+      {
+        "id": 41,
+        "recipeId": 6,
+        "ingredientId": 51,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 42,
+        "recipeId": 6,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 43,
+        "recipeId": 6,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 22,
+        "recipeId": 6,
+        "order": 1,
+        "content": "土豆切丝泡水去淀粉，青椒切丝",
+        "durationMin": 5
+      },
+      {
+        "id": 23,
+        "recipeId": 6,
+        "order": 2,
+        "content": "热油爆香小米椒，下土豆丝大火快炒",
+        "durationMin": 3
+      },
+      {
+        "id": 24,
+        "recipeId": 6,
+        "order": 3,
+        "content": "加青椒丝和盐，沿锅边淋醋炒匀",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "蒜蓉西兰花",
+    "cover": "",
+    "description": "高纤维低热量的减脂餐主力，蒜香提味不用肉也香。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 150,
+    "protein": 6,
+    "fat": 9,
+    "carb": 12,
+    "fiber": 2.5,
+    "sodium": 420,
+    "timeMin": 12,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 44,
+        "recipeId": 7,
+        "ingredientId": 6,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 45,
+        "recipeId": 7,
+        "ingredientId": 66,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 46,
+        "recipeId": 7,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 47,
+        "recipeId": 7,
+        "ingredientId": 53,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 48,
+        "recipeId": 7,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 25,
+        "recipeId": 7,
+        "order": 1,
+        "content": "西兰花掰小朵，盐水浸泡后焯水 1 分钟",
+        "durationMin": 4
+      },
+      {
+        "id": 26,
+        "recipeId": 7,
+        "order": 2,
+        "content": "热油爆香蒜末",
+        "durationMin": 1
+      },
+      {
+        "id": 27,
+        "recipeId": 7,
+        "order": 3,
+        "content": "下西兰花大火翻炒，加盐和蚝油调味",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "鱼香肉丝",
+    "cover": "",
+    "description": "没有鱼却有鱼香味，酸甜咸辣一次满足。",
+    "categoryId": 2,
+    "method": "炒",
+    "difficulty": 2,
+    "calories": 360,
+    "protein": 20,
+    "fat": 22,
+    "carb": 18,
+    "fiber": 1.8,
+    "sodium": 850,
+    "timeMin": 25,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 49,
+        "recipeId": 8,
+        "ingredientId": 27,
+        "amount": 250,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 50,
+        "recipeId": 8,
+        "ingredientId": 4,
+        "amount": 80,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 51,
+        "recipeId": 8,
+        "ingredientId": 11,
+        "amount": 80,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 52,
+        "recipeId": 8,
+        "ingredientId": 70,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 53,
+        "recipeId": 8,
+        "ingredientId": 58,
+        "amount": 15,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 54,
+        "recipeId": 8,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 55,
+        "recipeId": 8,
+        "ingredientId": 51,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 56,
+        "recipeId": 8,
+        "ingredientId": 48,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 57,
+        "recipeId": 8,
+        "ingredientId": 55,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 58,
+        "recipeId": 8,
+        "ingredientId": 46,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 28,
+        "recipeId": 8,
+        "order": 1,
+        "content": "里脊肉切丝，加生抽和淀粉抓匀腌 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 29,
+        "recipeId": 8,
+        "order": 2,
+        "content": "木耳泡发切丝，青椒和胡萝卜切丝",
+        "durationMin": 5
+      },
+      {
+        "id": 30,
+        "recipeId": 8,
+        "order": 3,
+        "content": "调碗汁：生抽、醋、白糖、淀粉加少许水",
+        "durationMin": 2
+      },
+      {
+        "id": 31,
+        "recipeId": 8,
+        "order": 4,
+        "content": "热油滑炒肉丝至变色，加豆瓣酱炒出红油，下配菜和碗汁炒匀",
+        "durationMin": 5
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "番茄鸡蛋汤",
+    "cover": "",
+    "description": "餐前开胃、餐后解腻，五分钟就能端上桌。",
+    "categoryId": 4,
+    "method": "汤羹",
+    "difficulty": 1,
+    "calories": 120,
+    "protein": 8,
+    "fat": 7,
+    "carb": 7,
+    "fiber": 0.8,
+    "sodium": 420,
+    "timeMin": 12,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 59,
+        "recipeId": 9,
+        "ingredientId": 1,
+        "amount": 200,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 60,
+        "recipeId": 9,
+        "ingredientId": 38,
+        "amount": 1,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 61,
+        "recipeId": 9,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 62,
+        "recipeId": 9,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 63,
+        "recipeId": 9,
+        "ingredientId": 60,
+        "amount": 5,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 32,
+        "recipeId": 9,
+        "order": 1,
+        "content": "番茄切块，鸡蛋打散备用",
+        "durationMin": 3
+      },
+      {
+        "id": 33,
+        "recipeId": 9,
+        "order": 2,
+        "content": "少油炒番茄至软烂出汁",
+        "durationMin": 3
+      },
+      {
+        "id": 34,
+        "recipeId": 9,
+        "order": 3,
+        "content": "加清水烧开，缓缓淋入蛋液",
+        "durationMin": 3
+      },
+      {
+        "id": 35,
+        "recipeId": 9,
+        "order": 4,
+        "content": "加盐调味，出锅前淋香油、撒葱花",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "小米粥",
+    "cover": "",
+    "description": "养胃暖身的早餐基础款，提前一晚泡米更省时。",
+    "categoryId": 5,
+    "method": "主食",
+    "difficulty": 1,
+    "calories": 150,
+    "protein": 4,
+    "fat": 2,
+    "carb": 32,
+    "fiber": 1,
+    "sodium": 20,
+    "timeMin": 35,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 64,
+        "recipeId": 10,
+        "ingredientId": 41,
+        "amount": 100,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 65,
+        "recipeId": 10,
+        "ingredientId": 72,
+        "amount": 20,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 66,
+        "recipeId": 10,
+        "ingredientId": 73,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 36,
+        "recipeId": 10,
+        "order": 1,
+        "content": "小米淘洗干净，红枣去核",
+        "durationMin": 3
+      },
+      {
+        "id": 37,
+        "recipeId": 10,
+        "order": 2,
+        "content": "锅中加水烧开，下小米和红枣，小火煮 25 分钟",
+        "durationMin": 25
+      },
+      {
+        "id": 38,
+        "recipeId": 10,
+        "order": 3,
+        "content": "出锅前撒枸杞焖 2 分钟",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "title": "白灼虾",
+    "cover": "",
+    "description": "最大程度保留鲜甜，蘸汁一调就好吃。",
+    "categoryId": 3,
+    "method": "炖煮",
+    "difficulty": 1,
+    "calories": 180,
+    "protein": 30,
+    "fat": 6,
+    "carb": 2,
+    "fiber": 0,
+    "sodium": 380,
+    "timeMin": 15,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 67,
+        "recipeId": 11,
+        "ingredientId": 34,
+        "amount": 400,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 68,
+        "recipeId": 11,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 69,
+        "recipeId": 11,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 70,
+        "recipeId": 11,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 71,
+        "recipeId": 11,
+        "ingredientId": 60,
+        "amount": 5,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 39,
+        "recipeId": 11,
+        "order": 1,
+        "content": "锅中加水，放姜片和葱段烧开",
+        "durationMin": 3
+      },
+      {
+        "id": 40,
+        "recipeId": 11,
+        "order": 2,
+        "content": "下虾煮至变色弯曲后捞出",
+        "durationMin": 3
+      },
+      {
+        "id": 41,
+        "recipeId": 11,
+        "order": 3,
+        "content": "生抽加香油调成蘸汁",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "title": "可乐鸡翅",
+    "cover": "",
+    "description": "零失败的甜咸口硬菜，小朋友最爱。",
+    "categoryId": 2,
+    "method": "炖煮",
+    "difficulty": 1,
+    "calories": 320,
+    "protein": 22,
+    "fat": 18,
+    "carb": 16,
+    "fiber": 0.3,
+    "sodium": 620,
+    "timeMin": 30,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 72,
+        "recipeId": 12,
+        "ingredientId": 29,
+        "amount": 8,
+        "unit": "只",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 73,
+        "recipeId": 12,
+        "ingredientId": 74,
+        "amount": 300,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 74,
+        "recipeId": 12,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 75,
+        "recipeId": 12,
+        "ingredientId": 49,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 76,
+        "recipeId": 12,
+        "ingredientId": 52,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 42,
+        "recipeId": 12,
+        "order": 1,
+        "content": "鸡翅两面划刀，加料酒腌 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 43,
+        "recipeId": 12,
+        "order": 2,
+        "content": "热锅少油，鸡翅煎至两面微黄",
+        "durationMin": 4
+      },
+      {
+        "id": 44,
+        "recipeId": 12,
+        "order": 3,
+        "content": "倒入可乐和生抽，放姜片大火烧开",
+        "durationMin": 3
+      },
+      {
+        "id": 45,
+        "recipeId": 12,
+        "order": 4,
+        "content": "转小火焖 15 分钟，大火收汁",
+        "durationMin": 18
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "title": "糖醋排骨",
+    "cover": "",
+    "description": "酸甜浓郁、色泽红亮，端上桌就是硬菜。",
+    "categoryId": 2,
+    "method": "炖煮",
+    "difficulty": 2,
+    "calories": 420,
+    "protein": 20,
+    "fat": 24,
+    "carb": 28,
+    "fiber": 0.4,
+    "sodium": 750,
+    "timeMin": 50,
+    "baseServings": 3,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 77,
+        "recipeId": 13,
+        "ingredientId": 31,
+        "amount": 600,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 78,
+        "recipeId": 13,
+        "ingredientId": 48,
+        "amount": 20,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 79,
+        "recipeId": 13,
+        "ingredientId": 51,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 80,
+        "recipeId": 13,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 81,
+        "recipeId": 13,
+        "ingredientId": 52,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 82,
+        "recipeId": 13,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 83,
+        "recipeId": 13,
+        "ingredientId": 67,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 3,
+        "optional": true
+      }
+    ],
+    "steps": [
+      {
+        "id": 46,
+        "recipeId": 13,
+        "order": 1,
+        "content": "排骨冷水下锅焯水，捞出沥干",
+        "durationMin": 8
+      },
+      {
+        "id": 47,
+        "recipeId": 13,
+        "order": 2,
+        "content": "热油下排骨煎至微黄",
+        "durationMin": 4
+      },
+      {
+        "id": 48,
+        "recipeId": 13,
+        "order": 3,
+        "content": "加白糖、醋、生抽、料酒和姜片，加水没过排骨",
+        "durationMin": 2
+      },
+      {
+        "id": 49,
+        "recipeId": 13,
+        "order": 4,
+        "content": "小火炖 30 分钟",
+        "durationMin": 30
+      },
+      {
+        "id": 50,
+        "recipeId": 13,
+        "order": 5,
+        "content": "大火收汁，撒白芝麻",
+        "durationMin": 5
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "title": "干煸四季豆",
+    "cover": "",
+    "description": "干香微辣、口感起皱，配米饭一绝。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 2,
+    "calories": 210,
+    "protein": 7,
+    "fat": 13,
+    "carb": 16,
+    "fiber": 3,
+    "sodium": 520,
+    "timeMin": 20,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 84,
+        "recipeId": 14,
+        "ingredientId": 8,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 85,
+        "recipeId": 14,
+        "ingredientId": 26,
+        "amount": 80,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 86,
+        "recipeId": 14,
+        "ingredientId": 57,
+        "amount": 3,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 87,
+        "recipeId": 14,
+        "ingredientId": 56,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 88,
+        "recipeId": 14,
+        "ingredientId": 66,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 89,
+        "recipeId": 14,
+        "ingredientId": 46,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 51,
+        "recipeId": 14,
+        "order": 1,
+        "content": "四季豆撕去筋，掰成段",
+        "durationMin": 3
+      },
+      {
+        "id": 52,
+        "recipeId": 14,
+        "order": 2,
+        "content": "锅中多放油，下四季豆煸至表皮起皱盛出",
+        "durationMin": 6
+      },
+      {
+        "id": 53,
+        "recipeId": 14,
+        "order": 3,
+        "content": "余油炒香肉末、干辣椒、花椒和蒜末",
+        "durationMin": 4
+      },
+      {
+        "id": 54,
+        "recipeId": 14,
+        "order": 4,
+        "content": "倒回四季豆翻炒均匀，加盐调味",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "title": "香菇滑鸡",
+    "cover": "",
+    "description": "蒸出来的嫩滑，少油也不寡淡。",
+    "categoryId": 2,
+    "method": "蒸",
+    "difficulty": 1,
+    "calories": 290,
+    "protein": 26,
+    "fat": 17,
+    "carb": 8,
+    "fiber": 1,
+    "sodium": 540,
+    "timeMin": 25,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 90,
+        "recipeId": 15,
+        "ingredientId": 28,
+        "amount": 250,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 91,
+        "recipeId": 15,
+        "ingredientId": 15,
+        "amount": 100,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 92,
+        "recipeId": 15,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 93,
+        "recipeId": 15,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 94,
+        "recipeId": 15,
+        "ingredientId": 55,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 95,
+        "recipeId": 15,
+        "ingredientId": 53,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 96,
+        "recipeId": 15,
+        "ingredientId": 46,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 55,
+        "recipeId": 15,
+        "order": 1,
+        "content": "鸡胸肉切块，加生抽、蚝油、淀粉和油抓匀腌 15 分钟",
+        "durationMin": 15
+      },
+      {
+        "id": 56,
+        "recipeId": 15,
+        "order": 2,
+        "content": "香菇切片，和姜片一起铺在鸡块上",
+        "durationMin": 3
+      },
+      {
+        "id": 57,
+        "recipeId": 15,
+        "order": 3,
+        "content": "水开后上锅大火蒸 12 分钟",
+        "durationMin": 12
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "title": "冬瓜排骨汤",
+    "cover": "",
+    "description": "清淡清甜，夏天最常煲的一锅汤。",
+    "categoryId": 2,
+    "method": "汤羹",
+    "difficulty": 1,
+    "calories": 260,
+    "protein": 16,
+    "fat": 16,
+    "carb": 10,
+    "fiber": 1.2,
+    "sodium": 480,
+    "timeMin": 60,
+    "baseServings": 3,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 97,
+        "recipeId": 16,
+        "ingredientId": 31,
+        "amount": 500,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 98,
+        "recipeId": 16,
+        "ingredientId": 14,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 99,
+        "recipeId": 16,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 100,
+        "recipeId": 16,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 101,
+        "recipeId": 16,
+        "ingredientId": 47,
+        "amount": 3,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 58,
+        "recipeId": 16,
+        "order": 1,
+        "content": "排骨焯水去血沫",
+        "durationMin": 8
+      },
+      {
+        "id": 59,
+        "recipeId": 16,
+        "order": 2,
+        "content": "锅中加水和姜葱，放排骨小火炖 40 分钟",
+        "durationMin": 40
+      },
+      {
+        "id": 60,
+        "recipeId": 16,
+        "order": 3,
+        "content": "冬瓜去皮切块下锅，再炖 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 61,
+        "recipeId": 16,
+        "order": 4,
+        "content": "加盐调味",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "title": "酸辣土豆丝",
+    "cover": "",
+    "description": "酸辣脆爽，切丝越细越好吃。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 190,
+    "protein": 4,
+    "fat": 10,
+    "carb": 24,
+    "fiber": 2,
+    "sodium": 600,
+    "timeMin": 15,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 102,
+        "recipeId": 17,
+        "ingredientId": 2,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 103,
+        "recipeId": 17,
+        "ingredientId": 57,
+        "amount": 3,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 104,
+        "recipeId": 17,
+        "ingredientId": 56,
+        "amount": 1,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 105,
+        "recipeId": 17,
+        "ingredientId": 51,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 106,
+        "recipeId": 17,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 107,
+        "recipeId": 17,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 62,
+        "recipeId": 17,
+        "order": 1,
+        "content": "土豆切细丝，泡水去掉表面淀粉",
+        "durationMin": 5
+      },
+      {
+        "id": 63,
+        "recipeId": 17,
+        "order": 2,
+        "content": "热油爆香干辣椒和花椒",
+        "durationMin": 1
+      },
+      {
+        "id": 64,
+        "recipeId": 17,
+        "order": 3,
+        "content": "下土豆丝大火快炒，加盐和醋炒匀",
+        "durationMin": 3
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "title": "韭菜炒鸡蛋",
+    "cover": "",
+    "description": "鲜香快手，十分钟解决一顿饭。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 210,
+    "protein": 13,
+    "fat": 14,
+    "carb": 7,
+    "fiber": 2,
+    "sodium": 400,
+    "timeMin": 10,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 108,
+        "recipeId": 18,
+        "ingredientId": 13,
+        "amount": 200,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 109,
+        "recipeId": 18,
+        "ingredientId": 38,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 110,
+        "recipeId": 18,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 111,
+        "recipeId": 18,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 65,
+        "recipeId": 18,
+        "order": 1,
+        "content": "韭菜洗净切段，鸡蛋打散",
+        "durationMin": 3
+      },
+      {
+        "id": 66,
+        "recipeId": 18,
+        "order": 2,
+        "content": "热油炒蛋至凝固盛出",
+        "durationMin": 2
+      },
+      {
+        "id": 67,
+        "recipeId": 18,
+        "order": 3,
+        "content": "下韭菜快炒，倒回鸡蛋加盐炒匀",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "title": "蒜蓉粉丝蒸扇贝",
+    "cover": "",
+    "description": "蒜香浓郁，宴客摆盘也有面子。",
+    "categoryId": 3,
+    "method": "蒸",
+    "difficulty": 2,
+    "calories": 240,
+    "protein": 18,
+    "fat": 10,
+    "carb": 20,
+    "fiber": 1,
+    "sodium": 560,
+    "timeMin": 20,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 112,
+        "recipeId": 19,
+        "ingredientId": 35,
+        "amount": 6,
+        "unit": "只",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 113,
+        "recipeId": 19,
+        "ingredientId": 69,
+        "amount": 30,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 114,
+        "recipeId": 19,
+        "ingredientId": 66,
+        "amount": 15,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 115,
+        "recipeId": 19,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 116,
+        "recipeId": 19,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 117,
+        "recipeId": 19,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": true
+      }
+    ],
+    "steps": [
+      {
+        "id": 68,
+        "recipeId": 19,
+        "order": 1,
+        "content": "扇贝刷洗干净，粉丝温水泡软",
+        "durationMin": 5
+      },
+      {
+        "id": 69,
+        "recipeId": 19,
+        "order": 2,
+        "content": "粉丝铺在壳上，放上扇贝肉，铺蒜蓉",
+        "durationMin": 3
+      },
+      {
+        "id": 70,
+        "recipeId": 19,
+        "order": 3,
+        "content": "水开后上锅大火蒸 8 分钟",
+        "durationMin": 8
+      },
+      {
+        "id": 71,
+        "recipeId": 19,
+        "order": 4,
+        "content": "淋生抽，浇热油，撒葱花",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "title": "红烧茄子",
+    "cover": "",
+    "description": "酱香软糯，茄子吸饱汤汁才好吃。",
+    "categoryId": 1,
+    "method": "炖煮",
+    "difficulty": 2,
+    "calories": 280,
+    "protein": 5,
+    "fat": 18,
+    "carb": 22,
+    "fiber": 3.5,
+    "sodium": 650,
+    "timeMin": 25,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 118,
+        "recipeId": 20,
+        "ingredientId": 7,
+        "amount": 400,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 119,
+        "recipeId": 20,
+        "ingredientId": 4,
+        "amount": 80,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 120,
+        "recipeId": 20,
+        "ingredientId": 66,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 121,
+        "recipeId": 20,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 122,
+        "recipeId": 20,
+        "ingredientId": 48,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 123,
+        "recipeId": 20,
+        "ingredientId": 55,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 124,
+        "recipeId": 20,
+        "ingredientId": 46,
+        "amount": 25,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 72,
+        "recipeId": 20,
+        "order": 1,
+        "content": "茄子切滚刀块，撒淀粉抓匀",
+        "durationMin": 4
+      },
+      {
+        "id": 73,
+        "recipeId": 20,
+        "order": 2,
+        "content": "热油把茄子煎至表面金黄盛出",
+        "durationMin": 5
+      },
+      {
+        "id": 74,
+        "recipeId": 20,
+        "order": 3,
+        "content": "余油爆香蒜末，下茄子、青椒和调料翻炒",
+        "durationMin": 3
+      },
+      {
+        "id": 75,
+        "recipeId": 20,
+        "order": 4,
+        "content": "加少许水焖 3 分钟收汁",
+        "durationMin": 3
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "title": "手撕包菜",
+    "cover": "",
+    "description": "锅气十足，酸辣脆爽的下饭素菜。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 130,
+    "protein": 3,
+    "fat": 8,
+    "carb": 12,
+    "fiber": 2.5,
+    "sodium": 380,
+    "timeMin": 10,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 125,
+        "recipeId": 21,
+        "ingredientId": 9,
+        "amount": 400,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 126,
+        "recipeId": 21,
+        "ingredientId": 57,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 127,
+        "recipeId": 21,
+        "ingredientId": 66,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 128,
+        "recipeId": 21,
+        "ingredientId": 51,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 129,
+        "recipeId": 21,
+        "ingredientId": 49,
+        "amount": 10,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 130,
+        "recipeId": 21,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 76,
+        "recipeId": 21,
+        "order": 1,
+        "content": "包菜用手撕成小块",
+        "durationMin": 3
+      },
+      {
+        "id": 77,
+        "recipeId": 21,
+        "order": 2,
+        "content": "热油爆香蒜末和干辣椒",
+        "durationMin": 1
+      },
+      {
+        "id": 78,
+        "recipeId": 21,
+        "order": 3,
+        "content": "下包菜大火快炒，加醋和生抽调味",
+        "durationMin": 3
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "title": "苦瓜炒蛋",
+    "cover": "",
+    "description": "先苦后回甘，夏天清热降火的家常搭配。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 180,
+    "protein": 11,
+    "fat": 12,
+    "carb": 8,
+    "fiber": 2,
+    "sodium": 350,
+    "timeMin": 12,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 131,
+        "recipeId": 22,
+        "ingredientId": 19,
+        "amount": 250,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 132,
+        "recipeId": 22,
+        "ingredientId": 38,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 133,
+        "recipeId": 22,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 134,
+        "recipeId": 22,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 79,
+        "recipeId": 22,
+        "order": 1,
+        "content": "苦瓜去瓤切片，加盐抓匀腌 5 分钟后挤干水分",
+        "durationMin": 5
+      },
+      {
+        "id": 80,
+        "recipeId": 22,
+        "order": 2,
+        "content": "热油炒蛋至凝固盛出",
+        "durationMin": 2
+      },
+      {
+        "id": 81,
+        "recipeId": 22,
+        "order": 3,
+        "content": "下苦瓜快炒，倒回鸡蛋加盐炒匀",
+        "durationMin": 3
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "title": "葱爆羊肉",
+    "cover": "",
+    "description": "大火快炒的北方名菜，羊肉嫩、葱香足。",
+    "categoryId": 2,
+    "method": "炒",
+    "difficulty": 2,
+    "calories": 330,
+    "protein": 28,
+    "fat": 20,
+    "carb": 9,
+    "fiber": 0.8,
+    "sodium": 700,
+    "timeMin": 20,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 135,
+        "recipeId": 23,
+        "ingredientId": 32,
+        "amount": 300,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 136,
+        "recipeId": 23,
+        "ingredientId": 64,
+        "amount": 2,
+        "unit": "根",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 137,
+        "recipeId": 23,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 138,
+        "recipeId": 23,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 139,
+        "recipeId": 23,
+        "ingredientId": 52,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 140,
+        "recipeId": 23,
+        "ingredientId": 61,
+        "amount": 3,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 141,
+        "recipeId": 23,
+        "ingredientId": 46,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 82,
+        "recipeId": 23,
+        "order": 1,
+        "content": "羊肉切薄片，加生抽和料酒腌 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 83,
+        "recipeId": 23,
+        "order": 2,
+        "content": "大葱切滚刀段",
+        "durationMin": 2
+      },
+      {
+        "id": 84,
+        "recipeId": 23,
+        "order": 3,
+        "content": "热油大火爆炒羊肉至变色，下葱段、姜片和孜然粉快速炒匀",
+        "durationMin": 4
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "title": "蛋炒饭",
+    "cover": "",
+    "description": "隔夜饭的最佳归宿，粒粒分明的黄金炒饭。",
+    "categoryId": 5,
+    "method": "主食",
+    "difficulty": 1,
+    "calories": 420,
+    "protein": 14,
+    "fat": 15,
+    "carb": 55,
+    "fiber": 1,
+    "sodium": 700,
+    "timeMin": 15,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 142,
+        "recipeId": 24,
+        "ingredientId": 45,
+        "amount": 400,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 143,
+        "recipeId": 24,
+        "ingredientId": 38,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 144,
+        "recipeId": 24,
+        "ingredientId": 11,
+        "amount": 60,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 145,
+        "recipeId": 24,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 146,
+        "recipeId": 24,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 147,
+        "recipeId": 24,
+        "ingredientId": 46,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 85,
+        "recipeId": 24,
+        "order": 1,
+        "content": "胡萝卜切小丁，鸡蛋打散",
+        "durationMin": 3
+      },
+      {
+        "id": 86,
+        "recipeId": 24,
+        "order": 2,
+        "content": "热油炒蛋至半凝固，下米饭翻炒打散",
+        "durationMin": 3
+      },
+      {
+        "id": 87,
+        "recipeId": 24,
+        "order": 3,
+        "content": "加胡萝卜丁和盐继续翻炒均匀",
+        "durationMin": 3
+      },
+      {
+        "id": 88,
+        "recipeId": 24,
+        "order": 4,
+        "content": "撒葱花出锅",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "title": "番茄牛腩",
+    "cover": "",
+    "description": "番茄的酸甜把牛腩炖得软烂入味，汤汁拌饭能吃两碗。",
+    "categoryId": 2,
+    "method": "炖煮",
+    "difficulty": 3,
+    "calories": 460,
+    "protein": 28,
+    "fat": 26,
+    "carb": 22,
+    "fiber": 2.5,
+    "sodium": 780,
+    "timeMin": 90,
+    "baseServings": 3,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 148,
+        "recipeId": 25,
+        "ingredientId": 30,
+        "amount": 600,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 149,
+        "recipeId": 25,
+        "ingredientId": 1,
+        "amount": 400,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 150,
+        "recipeId": 25,
+        "ingredientId": 12,
+        "amount": 100,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 151,
+        "recipeId": 25,
+        "ingredientId": 65,
+        "amount": 3,
+        "unit": "片",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 152,
+        "recipeId": 25,
+        "ingredientId": 49,
+        "amount": 20,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 153,
+        "recipeId": 25,
+        "ingredientId": 52,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 154,
+        "recipeId": 25,
+        "ingredientId": 48,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 3,
+        "optional": false
+      },
+      {
+        "id": 155,
+        "recipeId": 25,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 3,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 89,
+        "recipeId": 25,
+        "order": 1,
+        "content": "牛腩切块焯水，捞出洗净",
+        "durationMin": 10
+      },
+      {
+        "id": 90,
+        "recipeId": 25,
+        "order": 2,
+        "content": "热油炒香洋葱和姜片，下牛腩翻炒",
+        "durationMin": 5
+      },
+      {
+        "id": 91,
+        "recipeId": 25,
+        "order": 3,
+        "content": "加料酒、生抽和热水，小火炖 60 分钟",
+        "durationMin": 60
+      },
+      {
+        "id": 92,
+        "recipeId": 25,
+        "order": 4,
+        "content": "下番茄块和白糖，再炖 15 分钟至汤汁浓稠",
+        "durationMin": 15
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "title": "清炒时蔬",
+    "cover": "",
+    "description": "大火快炒保留翠绿，一餐里不可缺少的一盘绿。",
+    "categoryId": 1,
+    "method": "炒",
+    "difficulty": 1,
+    "calories": 95,
+    "protein": 3,
+    "fat": 6,
+    "carb": 7,
+    "fiber": 2.2,
+    "sodium": 320,
+    "timeMin": 8,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 156,
+        "recipeId": 26,
+        "ingredientId": 22,
+        "amount": 400,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 157,
+        "recipeId": 26,
+        "ingredientId": 66,
+        "amount": 5,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 158,
+        "recipeId": 26,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 159,
+        "recipeId": 26,
+        "ingredientId": 46,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 93,
+        "recipeId": 26,
+        "order": 1,
+        "content": "青菜洗净沥干，大蒜切片",
+        "durationMin": 3
+      },
+      {
+        "id": 94,
+        "recipeId": 26,
+        "order": 2,
+        "content": "热油爆香蒜片，下青菜大火快炒",
+        "durationMin": 2
+      },
+      {
+        "id": 95,
+        "recipeId": 26,
+        "order": 3,
+        "content": "加盐炒匀立即出锅",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "title": "香煎豆腐",
+    "cover": "",
+    "description": "外皮焦香、内里嫩滑，蘸汁吃更香。",
+    "categoryId": 7,
+    "method": "炸煎",
+    "difficulty": 1,
+    "calories": 260,
+    "protein": 18,
+    "fat": 17,
+    "carb": 10,
+    "fiber": 1,
+    "sodium": 520,
+    "timeMin": 20,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 160,
+        "recipeId": 27,
+        "ingredientId": 68,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 161,
+        "recipeId": 27,
+        "ingredientId": 38,
+        "amount": 1,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 162,
+        "recipeId": 27,
+        "ingredientId": 55,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 163,
+        "recipeId": 27,
+        "ingredientId": 49,
+        "amount": 15,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 164,
+        "recipeId": 27,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": true
+      },
+      {
+        "id": 165,
+        "recipeId": 27,
+        "ingredientId": 46,
+        "amount": 25,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 96,
+        "recipeId": 27,
+        "order": 1,
+        "content": "豆腐切厚片，先裹淀粉再裹蛋液",
+        "durationMin": 3
+      },
+      {
+        "id": 97,
+        "recipeId": 27,
+        "order": 2,
+        "content": "平底锅热油，豆腐两面煎至金黄",
+        "durationMin": 6
+      },
+      {
+        "id": 98,
+        "recipeId": 27,
+        "order": 3,
+        "content": "淋生抽、撒葱花，出锅",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "title": "水煮肉片",
+    "cover": "",
+    "description": "麻辣过瘾，肉片滑嫩，最后的泼油是灵魂。",
+    "categoryId": 2,
+    "method": "炖煮",
+    "difficulty": 2,
+    "calories": 480,
+    "protein": 30,
+    "fat": 32,
+    "carb": 14,
+    "fiber": 2,
+    "sodium": 950,
+    "timeMin": 30,
+    "baseServings": 2,
+    "status": 1,
+    "ingredients": [
+      {
+        "id": 166,
+        "recipeId": 28,
+        "ingredientId": 27,
+        "amount": 250,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 167,
+        "recipeId": 28,
+        "ingredientId": 22,
+        "amount": 200,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 168,
+        "recipeId": 28,
+        "ingredientId": 58,
+        "amount": 20,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 169,
+        "recipeId": 28,
+        "ingredientId": 57,
+        "amount": 4,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 170,
+        "recipeId": 28,
+        "ingredientId": 56,
+        "amount": 3,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 171,
+        "recipeId": 28,
+        "ingredientId": 66,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 172,
+        "recipeId": 28,
+        "ingredientId": 55,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 173,
+        "recipeId": 28,
+        "ingredientId": 46,
+        "amount": 25,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 99,
+        "recipeId": 28,
+        "order": 1,
+        "content": "里脊肉切薄片，加淀粉抓匀腌 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 100,
+        "recipeId": 28,
+        "order": 2,
+        "content": "青菜焯水后铺在碗底",
+        "durationMin": 3
+      },
+      {
+        "id": 101,
+        "recipeId": 28,
+        "order": 3,
+        "content": "热油炒豆瓣酱出红油，加水烧开，下肉片煮熟倒入碗中",
+        "durationMin": 6
+      },
+      {
+        "id": 102,
+        "recipeId": 28,
+        "order": 4,
+        "content": "肉片上撒蒜末、干辣椒和花椒，泼热油激香",
+        "durationMin": 2
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "title": "紫菜蛋花汤",
+    "cover": "",
+    "description": "两分钟出锅的快手汤，搭配任何主食都合适。",
+    "categoryId": 4,
+    "method": "汤羹",
+    "difficulty": 1,
+    "calories": 90,
+    "protein": 7,
+    "fat": 5,
+    "carb": 5,
+    "fiber": 0.6,
+    "sodium": 520,
+    "timeMin": 8,
+    "baseServings": 2,
+    "status": 0,
+    "ingredients": [
+      {
+        "id": 174,
+        "recipeId": 29,
+        "ingredientId": 37,
+        "amount": 10,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 175,
+        "recipeId": 29,
+        "ingredientId": 38,
+        "amount": 1,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 176,
+        "recipeId": 29,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 177,
+        "recipeId": 29,
+        "ingredientId": 47,
+        "amount": 2,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 178,
+        "recipeId": 29,
+        "ingredientId": 60,
+        "amount": 5,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      }
+    ],
+    "steps": [
+      {
+        "id": 103,
+        "recipeId": 29,
+        "order": 1,
+        "content": "锅中水烧开，撕入紫菜",
+        "durationMin": 2
+      },
+      {
+        "id": 104,
+        "recipeId": 29,
+        "order": 2,
+        "content": "缓缓淋入蛋液，加盐调味",
+        "durationMin": 2
+      },
+      {
+        "id": 105,
+        "recipeId": 29,
+        "order": 3,
+        "content": "撒葱花、淋香油出锅",
+        "durationMin": 1
+      }
+    ]
+  },
+  {
+    "id": 30,
+    "title": "蒸蛋羹",
+    "cover": "",
+    "description": "嫩滑如布丁，老人小孩都适合的蒸蛋。",
+    "categoryId": 4,
+    "method": "蒸",
+    "difficulty": 1,
+    "calories": 130,
+    "protein": 11,
+    "fat": 8,
+    "carb": 3,
+    "fiber": 0,
+    "sodium": 280,
+    "timeMin": 15,
+    "baseServings": 2,
+    "status": 0,
+    "ingredients": [
+      {
+        "id": 179,
+        "recipeId": 30,
+        "ingredientId": 38,
+        "amount": 2,
+        "unit": "个",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 180,
+        "recipeId": 30,
+        "ingredientId": 47,
+        "amount": 1,
+        "unit": "g",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 181,
+        "recipeId": 30,
+        "ingredientId": 60,
+        "amount": 3,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 182,
+        "recipeId": 30,
+        "ingredientId": 49,
+        "amount": 5,
+        "unit": "ml",
+        "perServings": 2,
+        "optional": false
+      },
+      {
+        "id": 183,
+        "recipeId": 30,
+        "ingredientId": 64,
+        "amount": 1,
+        "unit": "根",
+        "perServings": 2,
+        "optional": true
+      }
+    ],
+    "steps": [
+      {
+        "id": 106,
+        "recipeId": 30,
+        "order": 1,
+        "content": "鸡蛋加盐打散，按 1:1.5 加温水搅匀，撇去浮沫",
+        "durationMin": 3
+      },
+      {
+        "id": 107,
+        "recipeId": 30,
+        "order": 2,
+        "content": "盖保鲜膜扎孔，水开后中小火蒸 10 分钟",
+        "durationMin": 10
+      },
+      {
+        "id": 108,
+        "recipeId": 30,
+        "order": 3,
+        "content": "淋生抽和香油，撒葱花",
+        "durationMin": 1
+      }
+    ]
+  }
+]
