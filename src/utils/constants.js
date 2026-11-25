@@ -33,3 +33,13 @@ export const DEFAULT_PANTRY = [
   '姜',
   '蒜',
 ]
+
+// 营养推荐值：成年人日均参考量（演示用固定标准）
+// S8 数据统计页的「营养摄入」雷达图与 S10 智能配菜的「营养缺口」共用这一份数据
+export const NUTRITION_RECOMMEND = {
+  protein: 60, // 蛋白质 g
+  fat: 60, // 脂肪 g
+  carb: 300, // 碳水 g
+  fiber: 25, // 膳食纤维 g
+  sodium: 2000, // 钠 mg
+}

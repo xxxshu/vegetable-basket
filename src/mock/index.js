@@ -9,9 +9,10 @@
 import { AxiosError } from 'axios'
 
 import { aggregateShoppingList } from '@/utils/aggregate'
-import { DEFAULT_PANTRY } from '@/utils/constants'
+import { DEFAULT_PANTRY, NUTRITION_RECOMMEND } from '@/utils/constants'
 import { addDays, formatDate, getWeekStart, getWeekdayLabel, parseDate } from '@/utils/date'
 import { deepClone } from '@/utils/deepClone'
+import { recommendRecipes } from '@/utils/recommend'
 import { canMerge, normalize, toDisplay } from '@/utils/unit'
 
 import categories from './data/categories.json'
@@ -1454,9 +1455,7 @@ function getExpensesHandler() {
 // 数据来源：expenses（S7 确认核算写入）+ plans/planItems（一周计划）+ recipes（菜谱营养）；
 // 所有 handler 只读内存数据，不改任何业务状态。
 
-// 营养摄入的参考值：成年人日均推荐量（演示用固定标准，不属于 S9 家庭偏好）
-const NUTRITION_RECOMMEND = { protein: 60, fat: 60, carb: 300, fiber: 25, sodium: 2000 }
-// 与菜谱 nutrition 字段一一对应；数组顺序也是雷达图轴的顺序
+// 营养摄入 handler 用的指标 key（推荐值 NUTRITION_RECOMMEND 从 utils/constants 导入，与智能配菜共用）
 const NUTRITION_KEYS = ['protein', 'fat', 'carb', 'fiber', 'sodium']
 
 /**
@@ -1684,6 +1683,59 @@ function getRecipeDistributionHandler() {
     .sort((a, b) => b.count - a.count)
 }
 
+// ---------- 智能配菜推荐 mock（S10）----------
+
+// 组装推荐输入：全部菜谱（含下架，供本周计划营养统计）+ 库存 + 家庭设置 + 本周计划
+function recommendHandler(config) {
+  const body = parseBody(config)
+  const weekStart = String(body.weekStart || getWeekStart(new Date()))
+  const plan = plans.find((item) => item.weekStart === weekStart)
+  const planItemRows = plan ? planItems.filter((item) => item.planId === plan.id) : []
+
+  // 菜谱补上品类名与每份成本：成本复用 S6 的算法，保证推荐里的「每份成本」与计划预估一致
+  const recipeList = recipes.map((recipe) => ({
+    ...recipe,
+    categoryName: categories.find((category) => category.id === recipe.categoryId)?.name || '',
+    costPerServingFen: calcRecipeCostFenByServing(recipe),
+  }))
+
+  const ingredientMap = {}
+  ingredients.forEach((ingredient) => {
+    ingredientMap[ingredient.id] = {
+      id: ingredient.id,
+      name: ingredient.name,
+      aliases: ingredient.aliases,
+      unitBase: ingredient.unitBase,
+      pricePerUnit: ingredient.pricePerUnit,
+      categoryId: ingredient.categoryId,
+    }
+  })
+
+  return recommendRecipes({
+    recipes: recipeList,
+    ingredientMap,
+    // 库存：推荐只判断「有没有库存」（数量 > 0 即命中），单位不影响命中判断
+    pantryStock: pantryItems.map((row) => ({
+      ingredientId: row.ingredientId,
+      amount: row.amount,
+      unit: row.unit,
+    })),
+    preferences: family.preferences,
+    family: {
+      weekBudgetFen: family.weekBudgetFen,
+      memberCount: family.memberCount,
+    },
+    // 计划项带 date：营养缺口按「已排餐日期的日均」计算，与统计页口径一致
+    planItems: planItemRows.map((item) => ({
+      recipeId: item.recipeId,
+      servings: item.servings,
+      date: item.date,
+    })),
+    today: formatDate(new Date()),
+    topN: Number(body.topN) || 7,
+  })
+}
+
 // ---------- 认证接口 handler（S2）----------
 
 // 登录：校验用户名/密码/账号状态，成功后返回 token + 用户信息
@@ -1770,6 +1822,8 @@ const routes = [
   { method: 'get', path: '/stats/nutrition', handler: getNutritionHandler },
   { method: 'get', path: '/stats/category-share', handler: getCategoryShareHandler },
   { method: 'get', path: '/stats/recipe-distribution', handler: getRecipeDistributionHandler },
+  // S10 智能配菜：规则推荐（读取库存 / 家庭设置 / 本周计划）
+  { method: 'post', path: '/ai/recommend', handler: recommendHandler },
   { method: 'post', path: '/auth/login', handler: loginHandler },
   { method: 'get', path: '/auth/me', handler: getMeHandler },
 ]

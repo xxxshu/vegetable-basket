@@ -13,6 +13,7 @@ import { getExpenseTrend, getStatsOverview } from '@/api/stats'
 import ChartCard from '@/components/ChartCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import PageContainer from '@/components/PageContainer.vue'
+import RecommendDrawer from '@/components/RecommendDrawer.vue'
 import { MEAL_LABEL } from '@/utils/constants'
 import { getWeekStart } from '@/utils/date'
 import { formatMoney } from '@/utils/format'
@@ -32,6 +33,8 @@ const router = useRouter()
 const loading = ref(false)
 const overview = ref(null)
 const trend = ref([])
+// 智能配菜抽屉显示状态（S10）：推荐结果会读取库存/预算/本周计划
+const recommendVisible = ref(false)
 
 /** 跳转到指定页面（卡片 click 统一走这里，避免模板里散落 router.push） */
 function go(path) {
@@ -164,8 +167,9 @@ const trendOption = computed(() => {
 
 <template>
   <PageContainer title="工作台">
-    <!-- 右上角快捷入口：工作台最常见的两个动作 -->
+    <!-- 右上角快捷入口：智能配菜 + 常用跳转 -->
     <template #extra>
+      <el-button type="success" @click="recommendVisible = true">智能配菜</el-button>
       <el-button @click="go('/recipes')">去菜谱库</el-button>
       <el-button type="primary" @click="go('/plan')">去排计划</el-button>
     </template>
@@ -296,6 +300,9 @@ const trendOption = computed(() => {
         </aside>
       </div>
     </div>
+
+    <!-- 智能配菜抽屉：加入计划后刷新工作台概览（已排餐数 / 预估金额等） -->
+    <RecommendDrawer v-model="recommendVisible" @added="fetchDashboard" />
   </PageContainer>
 </template>
 
