@@ -7,6 +7,7 @@
 -->
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { addPlanItem, deletePlanItem, getPlan, updatePlanItem } from '@/api/plan'
 import MealCell from '@/components/MealCell.vue'
@@ -23,6 +24,8 @@ import {
   isToday,
 } from '@/utils/date'
 import { formatMoney } from '@/utils/format'
+
+const router = useRouter()
 
 // 餐次顺序：与 MealCell 的渲染顺序一致
 const mealTypes = ['breakfast', 'lunch', 'dinner']
@@ -187,6 +190,14 @@ async function handleRemove(item) {
 }
 
 /**
+ * 生成采购清单：跳转到采购清单页并自动触发生成（S7 接入）
+ * 采购清单页会检查本周是否已生成，未生成且本周有排餐则自动生成
+ */
+function goShopping() {
+  router.push({ path: '/shopping', query: { generate: '1' } })
+}
+
+/**
  * 复制上周：取上周 items → 深拷贝 → 映射到本周日期 → 批量新增
  * 必须深拷贝的原因：接口返回的 items 是对象引用，直接改日期/复用会互相影响；
  * 深拷贝后本周数据与上周完全独立（验收项：改本周不影响上周）。
@@ -237,12 +248,7 @@ async function handleCopyLastWeek() {
       <el-button @click="changeWeek(1)">下周</el-button>
       <el-button v-if="!isCurrentWeek" plain @click="goCurrentWeek">回到本周</el-button>
       <el-button @click="handleCopyLastWeek">复制上周</el-button>
-      <!-- 生成采购清单属 S7，本阶段先禁用占位 -->
-      <el-tooltip content="采购清单将在下一阶段（S7）实现" placement="top">
-        <span>
-          <el-button type="primary" disabled>生成采购清单</el-button>
-        </span>
-      </el-tooltip>
+      <el-button type="primary" @click="goShopping">生成采购清单</el-button>
     </template>
 
     <!-- 空周提示 -->

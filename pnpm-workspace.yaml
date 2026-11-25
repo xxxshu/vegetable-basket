@@ -3,3 +3,4 @@
 # 需要显式放行，否则 pnpm install 会以 ERR_PNPM_IGNORED_BUILDS 报错退出。
 allowBuilds:
   '@parcel/watcher': true
+  'core-js': false

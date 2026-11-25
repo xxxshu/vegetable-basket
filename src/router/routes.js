@@ -20,6 +20,8 @@ const AdminRecipeList = () => import('@/views/admin/recipes/index.vue')
 const AdminRecipeEdit = () => import('@/views/admin/recipes/edit.vue')
 // S6 一周计划
 const MealPlan = () => import('@/views/family/plan/index.vue')
+// S7 采购清单
+const ShoppingList = () => import('@/views/family/shopping/index.vue')
 
 // 不需要登录即可访问的路由（具体放行逻辑在守卫里）
 export const constantRoutes = [
@@ -68,7 +70,7 @@ export const asyncRoutes = [
       {
         path: 'shopping',
         name: 'Shopping',
-        component: PlaceholderPage,
+        component: ShoppingList,
         meta: { title: '采购清单', icon: 'ShoppingCart', roles: ['family'] },
       },
       {

@@ -8,7 +8,11 @@
 // - 金额统一留到 S7 用整数运算，避免浮点误差。
 import { AxiosError } from 'axios'
 
-import { addDays, getWeekStart, parseDate } from '@/utils/date'
+import { aggregateShoppingList } from '@/utils/aggregate'
+import { DEFAULT_PANTRY } from '@/utils/constants'
+import { addDays, formatDate, getWeekStart, parseDate } from '@/utils/date'
+import { deepClone } from '@/utils/deepClone'
+import { canMerge, normalize, toDisplay } from '@/utils/unit'
 
 import categories from './data/categories.json'
 import ingredients from './data/ingredients.json'
@@ -513,6 +517,538 @@ function copyPlanHandler(config) {
   return { copied: sourceItems.length, weekStart: toWeekStart }
 }
 
+// ---------- 采购清单 + 核算清单 mock（S7 重构）----------
+
+// 内存数据：pantryItems 库存（S9 扩展增删改）、shoppingLists 采购清单、shoppingAccounts 核算清单、expenses 支出
+const pantryItems = []
+const shoppingLists = []
+const shoppingAccounts = []
+const expenses = []
+let pantrySeedId = 1
+let shoppingSeedId = 1
+let shoppingItemSeedId = 1
+let shoppingAccountSeedId = 1
+let shoppingAccountItemSeedId = 1
+let expenseSeedId = 1
+
+const UNMERGEABLE_GROUP_NAME = '不可换算（按需购买）'
+
+// 种子库存：让「建议采购量」一进页面就能看到库存抵扣效果（土豆/番茄部分抵扣、鸡蛋完全覆盖）
+function seedPantry() {
+  const today = formatDate(new Date())
+  const seed = [
+    { name: '土豆', amount: 400, unit: 'g' },
+    { name: '番茄', amount: 150, unit: 'g' },
+    { name: '鸡蛋', amount: 2, unit: '个' },
+  ]
+  seed.forEach((row) => {
+    const ingredient = ingredients.find((item) => item.name === row.name)
+    if (!ingredient) return
+    pantryItems.push({
+      id: pantrySeedId++,
+      familyId: 1,
+      ingredientId: ingredient.id,
+      amount: row.amount,
+      unit: row.unit,
+      boughtAt: today,
+      expireAt: addDays(today, ingredient.shelfLifeDays || 7),
+    })
+  })
+}
+seedPantry()
+
+// 库存查询（S7 聚合抵扣用；S9 在此文件基础上扩展增删改页面与接口）
+function getPantryHandler() {
+  return pantryItems
+}
+
+// 组装聚合引擎的输入：mock 端从"后端数据"直接构建（前端则通过接口拼装，两边都喂给同一个纯函数）
+function buildShoppingInput(weekStart) {
+  const plan = plans.find((item) => item.weekStart === weekStart)
+  const weekItems = plan
+    ? planItems
+        .filter((item) => item.planId === plan.id)
+        .map((item) => ({
+          recipeId: item.recipeId,
+          servings: item.servings,
+          date: item.date,
+          mealType: item.mealType,
+        }))
+    : []
+
+  const recipeMap = {}
+  recipes.forEach((recipe) => {
+    recipeMap[recipe.id] = {
+      baseServings: recipe.baseServings,
+      ingredients: recipe.ingredients.map((row) => ({
+        ingredientId: row.ingredientId,
+        amount: row.amount,
+        unit: row.unit,
+      })),
+    }
+  })
+
+  const ingredientMap = {}
+  ingredients.forEach((ingredient) => {
+    ingredientMap[ingredient.id] = {
+      id: ingredient.id,
+      name: ingredient.name,
+      aliases: ingredient.aliases,
+      unitBase: ingredient.unitBase,
+      pricePerUnit: ingredient.pricePerUnit,
+      categoryId: ingredient.categoryId,
+    }
+  })
+
+  return {
+    weekItems,
+    recipeMap,
+    ingredientMap,
+    categories: categories
+      .filter((item) => item.type === 'ingredient')
+      .map((item) => ({ id: item.id, name: item.name })),
+    defaultPantry: DEFAULT_PANTRY,
+    stock: pantryItems.map((row) => ({
+      ingredientId: row.ingredientId,
+      amount: row.amount,
+      unit: row.unit,
+    })),
+    preferences: [],
+  }
+}
+
+// ===== 8 步聚合：mock 的 generate 内部同样调用聚合纯函数，返回"后端结果"供前端对照 =====
+function buildShoppingAggregation(weekStart) {
+  return aggregateShoppingList(buildShoppingInput(weekStart))
+}
+
+/** 把聚合结果加上清单项 id / 建议分量，变成可存储、可编辑的采购清单 */
+function createShoppingList(weekStart) {
+  const aggregation = buildShoppingAggregation(weekStart)
+  return {
+    id: shoppingSeedId++,
+    familyId: 1,
+    weekStart,
+    status: 'draft',
+    createdAt: formatDate(new Date()),
+    groups: aggregation.groups.map((group) => ({
+      ...group,
+      items: group.items.map((item) => ({
+        ...item,
+        id: shoppingItemSeedId++,
+        // 建议采购量 = 聚合结果（已扣库存），作为表单默认值，用户可自由修改
+        suggestedAmount: item.amount,
+        suggestedDisplay: item.display,
+        source: 'plan',
+        note: '',
+      })),
+    })),
+    unmergeableGroup: {
+      ...aggregation.unmergeableGroup,
+      items: aggregation.unmergeableGroup.items.map((item) => ({
+        ...item,
+        id: shoppingItemSeedId++,
+        suggestedAmount: item.amount,
+        suggestedDisplay: item.display,
+        source: 'plan',
+        note: '',
+      })),
+    },
+    summary: { ...aggregation.summary },
+  }
+}
+
+// 重新汇总采购清单数字（改分量 / 手动添加 / 删除后调用）
+function recalcShoppingSummary(list) {
+  let itemCount = 0
+  let estAmountFen = 0
+  list.groups.forEach((group) => {
+    group.items.forEach((item) => {
+      itemCount += 1
+      estAmountFen += item.priceFen
+    })
+  })
+  list.unmergeableGroup.items.forEach((item) => {
+    itemCount += 1
+    estAmountFen += item.priceFen
+  })
+  list.summary = {
+    itemCount,
+    groupCount: list.groups.length,
+    recipeCount: list.summary?.recipeCount || 0,
+    estAmountFen,
+  }
+}
+
+/** 按 id 找清单 + 清单项（改分量 / 删除用） */
+function findShoppingItem(itemId) {
+  const targetId = Number(itemId)
+  for (const list of shoppingLists) {
+    for (const group of list.groups) {
+      const item = group.items.find((row) => row.id === targetId)
+      if (item) return { list, group, item }
+    }
+    const unmergeableItem = list.unmergeableGroup.items.find((row) => row.id === targetId)
+    if (unmergeableItem) return { list, group: list.unmergeableGroup, item: unmergeableItem }
+  }
+  return null
+}
+
+/** 计算一条采购项金额（分）：与聚合引擎的计价规则一致 */
+function calcItemPriceFen(ingredient, amount, unit) {
+  const price = Number(ingredient.pricePerUnit) || 0
+  if (unit === 'g' || unit === 'ml') return Math.round((price * amount) / 1000)
+  return Math.round(price * amount)
+}
+
+/** 采购清单必须是草稿状态才允许修改（确认后锁定） */
+function ensureDraftShoppingList(list) {
+  if (!list) httpError(404, '采购清单不存在')
+  if (list.status !== 'draft') businessError(400, '采购清单已确认，不能继续修改')
+  return list
+}
+
+// 查询某周采购清单：未生成返回 null
+function getShoppingHandler(config) {
+  const weekStart = String(config.params?.weekStart || getWeekStart(new Date()))
+  return shoppingLists.find((item) => item.weekStart === weekStart) || null
+}
+
+// 生成/重新生成某周采购清单（已确认的清单不允许重新生成）
+function generateShoppingHandler(config) {
+  const body = parseBody(config)
+  const weekStart = String(body.weekStart || getWeekStart(new Date()))
+  const plan = plans.find((item) => item.weekStart === weekStart)
+  const weeklyItemCount = plan ? planItems.filter((row) => row.planId === plan.id).length : 0
+  if (weeklyItemCount === 0) businessError(400, '本周还没有排餐，请先去一周计划页排菜')
+
+  const existing = shoppingLists.find((item) => item.weekStart === weekStart)
+  if (existing?.status === 'confirmed') {
+    businessError(400, '采购清单已确认，不能重新生成')
+  }
+
+  const list = createShoppingList(weekStart)
+  if (existing) shoppingLists.splice(shoppingLists.indexOf(existing), 1, list)
+  else shoppingLists.push(list)
+  return list
+}
+
+// 修改采购项分量：建议量只是初始值，用户填多少就存多少（金额按食材均价重算）
+function patchShoppingItemHandler(config, routeParams) {
+  const found = findShoppingItem(routeParams.id)
+  if (!found) httpError(404, '采购项不存在')
+  ensureDraftShoppingList(found.list)
+
+  const body = parseBody(config)
+  const amount = Math.round(Number(body.amount) || 0)
+  if (amount <= 0) businessError(400, '分量必须大于 0')
+
+  const item = found.item
+  item.amount = amount
+  item.display = toDisplay(amount, item.unit)
+  // 不可换算项无法按均价计价，金额保持 0；可换算项按整数最小单位重算金额（分）
+  if (found.list.groups.includes(found.group)) {
+    const ingredient = ingredients.find((row) => row.id === item.ingredientId)
+    item.priceFen = ingredient ? calcItemPriceFen(ingredient, amount, item.unit) : 0
+  } else {
+    item.priceFen = 0
+  }
+  recalcShoppingSummary(found.list)
+  return item
+}
+
+// 删除采购项（草稿状态才可删）
+function deleteShoppingItemHandler(config, routeParams) {
+  const found = findShoppingItem(routeParams.id)
+  if (!found) httpError(404, '采购项不存在')
+  ensureDraftShoppingList(found.list)
+
+  const items = found.group.items
+  const index = items.findIndex((row) => row.id === found.item.id)
+  if (index >= 0) items.splice(index, 1)
+  recalcShoppingSummary(found.list)
+  return { id: found.item.id, summary: found.list.summary }
+}
+
+// 手动添加采购项：清单不存在时先建空草稿；已确认时拒绝
+function addShoppingItemHandler(config) {
+  const body = parseBody(config)
+  const weekStart = String(body.weekStart || getWeekStart(new Date()))
+  const ingredient = ingredients.find((item) => item.id === Number(body.ingredientId))
+  if (!ingredient) httpError(404, '食材不存在')
+
+  const amount = Math.round(Number(body.amount) || 0)
+  if (amount <= 0) businessError(400, '分量必须大于 0')
+  const unit = body.unit || ingredient.unitBase
+  if (!canMerge(unit, ingredient.unitBase)) businessError(400, '单位与食材基准单位不可换算')
+  const normalized = normalize(amount, unit)
+
+  let list = shoppingLists.find((item) => item.weekStart === weekStart)
+  if (!list) {
+    list = {
+      id: shoppingSeedId++,
+      familyId: 1,
+      weekStart,
+      status: 'draft',
+      createdAt: formatDate(new Date()),
+      groups: [],
+      unmergeableGroup: { categoryName: UNMERGEABLE_GROUP_NAME, items: [] },
+      summary: { itemCount: 0, groupCount: 0, recipeCount: 0, estAmountFen: 0 },
+    }
+    shoppingLists.push(list)
+  }
+  ensureDraftShoppingList(list)
+
+  // 按品类找分组，没有就新建
+  let group = list.groups.find((item) => Number(item.categoryId) === Number(ingredient.categoryId))
+  if (!group) {
+    group = {
+      categoryId: ingredient.categoryId,
+      categoryName: categories.find((item) => item.id === ingredient.categoryId)?.name || '其他',
+      items: [],
+    }
+    list.groups.push(group)
+    list.groups.sort((a, b) => Number(a.categoryId) - Number(b.categoryId))
+  }
+
+  // 同食材 + 同单位已存在 → 分量与金额合并
+  const priceFen = calcItemPriceFen(ingredient, normalized.amount, normalized.unit)
+  const existing = group.items.find(
+    (item) => item.ingredientId === ingredient.id && item.unit === normalized.unit,
+  )
+  if (existing) {
+    existing.amount += normalized.amount
+    existing.suggestedAmount += normalized.amount
+    existing.display = toDisplay(existing.amount, existing.unit)
+    existing.suggestedDisplay = toDisplay(existing.suggestedAmount, existing.unit)
+    existing.priceFen += priceFen
+    existing.source = 'manual'
+  } else {
+    group.items.push({
+      id: shoppingItemSeedId++,
+      key: `${ingredient.id}__${normalized.unit}`,
+      ingredientId: ingredient.id,
+      name: ingredient.name,
+      amount: normalized.amount,
+      unit: normalized.unit,
+      display: toDisplay(normalized.amount, normalized.unit),
+      suggestedAmount: normalized.amount,
+      suggestedDisplay: toDisplay(normalized.amount, normalized.unit),
+      priceFen,
+      stockShort: false,
+      source: 'manual',
+      note: String(body.note || ''),
+    })
+    group.items.sort((a, b) => b.amount - a.amount || a.name.localeCompare(b.name))
+  }
+
+  recalcShoppingSummary(list)
+  return list
+}
+
+// 确认采购清单：状态置 confirmed 并锁定
+function confirmShoppingHandler(config, routeParams) {
+  const list = shoppingLists.find((item) => item.id === Number(routeParams.id))
+  if (!list) httpError(404, '采购清单不存在')
+  if (list.status !== 'draft') businessError(400, '该采购清单已确认')
+  if (!list.summary.itemCount) businessError(400, '采购清单为空，不能确认')
+  list.status = 'confirmed'
+  list.confirmedAt = formatDate(new Date())
+  return list
+}
+
+// ---------- 核算清单 ----------
+
+/** 按周找核算清单 */
+function findShoppingAccount(weekStart) {
+  return shoppingAccounts.find((item) => item.weekStart === weekStart) || null
+}
+
+/** 重新汇总核算清单：实付合计 = 所有核算项金额（分）之和 */
+function recalcAccountSummary(account) {
+  const actualAmountFen = account.items.reduce((sum, item) => sum + item.priceFen, 0)
+  account.summary = { itemCount: account.items.length, actualAmountFen }
+}
+
+/** 核算清单必须是草稿状态才允许修改（确认后锁定） */
+function ensureDraftAccount(account) {
+  if (!account) httpError(404, '核算清单不存在')
+  if (account.status !== 'draft') businessError(400, '核算已确认，不能继续修改')
+  return account
+}
+
+// 查询某周核算清单：未生成返回 null
+function getShoppingAccountHandler(config) {
+  const weekStart = String(config.params?.weekStart || getWeekStart(new Date()))
+  return findShoppingAccount(weekStart)
+}
+
+// 从已确认的采购清单生成核算清单草稿：默认带出食材、分量、预估金额（用户可改）
+function createShoppingAccountHandler(config) {
+  const body = parseBody(config)
+  const weekStart = String(body.weekStart || getWeekStart(new Date()))
+
+  const shoppingList = shoppingLists.find((item) => item.weekStart === weekStart)
+  if (!shoppingList) businessError(400, '请先生成采购清单')
+  if (shoppingList.status !== 'confirmed') businessError(400, '请先确认采购清单，再开始核算')
+
+  // 已生成过核算清单则直接返回（避免重复创建）
+  const existing = findShoppingAccount(weekStart)
+  if (existing) return existing
+
+  const items = []
+  shoppingList.groups.forEach((group) => {
+    group.items.forEach((item) => {
+      items.push({
+        id: shoppingAccountItemSeedId++,
+        ingredientId: item.ingredientId,
+        name: item.name,
+        amount: item.amount,
+        unit: item.unit,
+        display: toDisplay(item.amount, item.unit),
+        priceFen: item.priceFen,
+        source: 'list',
+        note: item.note || '',
+      })
+    })
+  })
+  shoppingList.unmergeableGroup.items.forEach((item) => {
+    items.push({
+      id: shoppingAccountItemSeedId++,
+      ingredientId: item.ingredientId,
+      name: item.name,
+      amount: item.amount,
+      unit: item.unit,
+      display: toDisplay(item.amount, item.unit),
+      priceFen: 0,
+      source: 'list',
+      note: '按需购买',
+    })
+  })
+
+  const account = {
+    id: shoppingAccountSeedId++,
+    familyId: 1,
+    weekStart,
+    shoppingListId: shoppingList.id,
+    status: 'draft',
+    items,
+    summary: { itemCount: 0, actualAmountFen: 0 },
+    createdAt: formatDate(new Date()),
+  }
+  recalcAccountSummary(account)
+  shoppingAccounts.push(account)
+  return account
+}
+
+// 修改核算项：分量 / 金额都可自由改（金额单位：分）
+function patchShoppingAccountItemHandler(config, routeParams) {
+  const body = parseBody(config)
+  const weekStart = String(body.weekStart || '')
+  const account = weekStart
+    ? findShoppingAccount(weekStart)
+    : shoppingAccounts.find((item) => item.items.some((row) => row.id === Number(routeParams.id)))
+  ensureDraftAccount(account)
+
+  const item = account.items.find((row) => row.id === Number(routeParams.id))
+  if (!item) httpError(404, '核算项不存在')
+
+  if (body.amount !== undefined) {
+    const amount = Math.round(Number(body.amount) || 0)
+    if (amount <= 0) businessError(400, '分量必须大于 0')
+    item.amount = amount
+    item.display = toDisplay(amount, item.unit)
+  }
+  if (body.priceFen !== undefined) {
+    const priceFen = Math.round(Number(body.priceFen) || 0)
+    if (priceFen < 0) businessError(400, '金额不能为负数')
+    item.priceFen = priceFen
+  }
+  recalcAccountSummary(account)
+  return item
+}
+
+// 手动添加核算项（采购时临时多买的东西）
+function addShoppingAccountItemHandler(config) {
+  const body = parseBody(config)
+  const weekStart = String(body.weekStart || getWeekStart(new Date()))
+  const account = findShoppingAccount(weekStart)
+  ensureDraftAccount(account)
+
+  const ingredient = ingredients.find((item) => item.id === Number(body.ingredientId))
+  if (!ingredient) httpError(404, '食材不存在')
+  const amount = Math.round(Number(body.amount) || 0)
+  if (amount <= 0) businessError(400, '分量必须大于 0')
+  const unit = body.unit || ingredient.unitBase
+  if (!canMerge(unit, ingredient.unitBase)) businessError(400, '单位与食材基准单位不可换算')
+  const normalized = normalize(amount, unit)
+  // 金额不传则按食材均价估一个默认值，用户可在行内修改
+  const priceFen =
+    body.priceFen !== undefined
+      ? Math.max(0, Math.round(Number(body.priceFen) || 0))
+      : calcItemPriceFen(ingredient, normalized.amount, normalized.unit)
+
+  // 同食材 + 同单位合并分量与金额
+  const existing = account.items.find(
+    (item) => item.ingredientId === ingredient.id && item.unit === normalized.unit,
+  )
+  if (existing) {
+    existing.amount += normalized.amount
+    existing.display = toDisplay(existing.amount, existing.unit)
+    existing.priceFen += priceFen
+    existing.source = 'manual'
+  } else {
+    account.items.push({
+      id: shoppingAccountItemSeedId++,
+      ingredientId: ingredient.id,
+      name: ingredient.name,
+      amount: normalized.amount,
+      unit: normalized.unit,
+      display: toDisplay(normalized.amount, normalized.unit),
+      priceFen,
+      source: 'manual',
+      note: String(body.note || ''),
+    })
+  }
+  recalcAccountSummary(account)
+  return account
+}
+
+// 删除核算项
+function deleteShoppingAccountItemHandler(config, routeParams) {
+  const account = shoppingAccounts.find((item) =>
+    item.items.some((row) => row.id === Number(routeParams.id)),
+  )
+  ensureDraftAccount(account)
+  const index = account.items.findIndex((row) => row.id === Number(routeParams.id))
+  account.items.splice(index, 1)
+  recalcAccountSummary(account)
+  return account
+}
+
+// 确认核算：锁定 + 按实付金额写一条支出记录
+function confirmShoppingAccountHandler(config, routeParams) {
+  const account = shoppingAccounts.find((item) => item.id === Number(routeParams.id))
+  ensureDraftAccount(account)
+  account.status = 'done'
+  account.confirmedAt = formatDate(new Date())
+  recalcAccountSummary(account)
+  expenses.push({
+    id: expenseSeedId++,
+    familyId: 1,
+    date: account.confirmedAt,
+    amountFen: account.summary.actualAmountFen,
+    note: `采购核算 ${account.weekStart}`,
+    categoryId: null,
+  })
+  return account
+}
+
+// 支出列表（S8 统计会用到；验收"确认核算写入支出"）
+function getExpensesHandler() {
+  return expenses
+}
+
 // ---------- 认证接口 handler（S2）----------
 
 // 登录：校验用户名/密码/账号状态，成功后返回 token + 用户信息
@@ -559,6 +1095,28 @@ const routes = [
   { method: 'put', path: '/plans/items/:id', handler: updatePlanItemHandler },
   { method: 'delete', path: '/plans/items/:id', handler: deletePlanItemHandler },
   { method: 'post', path: '/plans/copy', handler: copyPlanHandler },
+  { method: 'get', path: '/pantry', handler: getPantryHandler },
+  { method: 'get', path: '/shopping', handler: getShoppingHandler },
+  { method: 'post', path: '/shopping/generate', handler: generateShoppingHandler },
+  { method: 'post', path: '/shopping/items', handler: addShoppingItemHandler },
+  { method: 'patch', path: '/shopping/items/:id', handler: patchShoppingItemHandler },
+  { method: 'delete', path: '/shopping/items/:id', handler: deleteShoppingItemHandler },
+  { method: 'post', path: '/shopping/:id/confirm', handler: confirmShoppingHandler },
+  { method: 'get', path: '/shopping/account', handler: getShoppingAccountHandler },
+  { method: 'post', path: '/shopping/account', handler: createShoppingAccountHandler },
+  { method: 'post', path: '/shopping/account/items', handler: addShoppingAccountItemHandler },
+  {
+    method: 'patch',
+    path: '/shopping/account/items/:id',
+    handler: patchShoppingAccountItemHandler,
+  },
+  {
+    method: 'delete',
+    path: '/shopping/account/items/:id',
+    handler: deleteShoppingAccountItemHandler,
+  },
+  { method: 'post', path: '/shopping/account/:id/confirm', handler: confirmShoppingAccountHandler },
+  { method: 'get', path: '/expenses', handler: getExpensesHandler },
   { method: 'post', path: '/auth/login', handler: loginHandler },
   { method: 'get', path: '/auth/me', handler: getMeHandler },
 ]
@@ -661,7 +1219,12 @@ export default async function mockAdapter(config) {
   try {
     // 第二个参数是路径参数（如 { id: '3' }），静态路由时为空对象
     const data = matched.route.handler(config, matched.params)
-    return Promise.resolve(buildSuccessResponse(config, { code: 0, message: 'ok', data }))
+    // 关键：返回前深拷贝，模拟真实 HTTP 的"序列化边界"。
+    // 否则 mock 内存对象会和页面状态共享引用——页面改数据、mock 也同步变，
+    // 会导致「后端接口已经改过值，前端再赋同样值不触发响应式」这类假象（采购清单勾选就踩过）。
+    return Promise.resolve(
+      buildSuccessResponse(config, { code: 0, message: 'ok', data: deepClone(data) }),
+    )
   } catch (error) {
     // 业务错误：HTTP 200 + code != 0（如登录密码错误），交给响应拦截器的业务失败分支
     if (error.businessCode) {

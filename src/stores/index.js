@@ -10,5 +10,6 @@ pinia.use(piniaPluginPersistedstate)
 // 统一导出所有 store：页面/组件一律从 '@/stores' 引入，不直接引用 modules 下的文件
 export { useUserStore } from './modules/user'
 export { useRecipeStore } from './modules/recipe'
+export { useShoppingStore } from './modules/shopping'
 
 export default pinia
