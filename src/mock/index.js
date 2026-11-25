@@ -8,6 +8,8 @@
 // - 金额统一留到 S7 用整数运算，避免浮点误差。
 import { AxiosError } from 'axios'
 
+import { addDays, getWeekStart, parseDate } from '@/utils/date'
+
 import categories from './data/categories.json'
 import ingredients from './data/ingredients.json'
 import recipes from './data/recipes.json'
@@ -333,6 +335,184 @@ function updateRecipeStatusHandler(config, routeParams) {
   return { id: recipe.id, status: recipe.status }
 }
 
+// ---------- 一周计划 mock（S6）----------
+
+// 内存数据：plans 一周一条；planItems 是格子里的菜（对应数据模型的 meal_plan / meal_plan_item）
+const plans = []
+const planItems = []
+let planSeedId = 1
+let planItemSeedId = 1
+
+// 餐次排序权重：同一天内按 早餐 → 午餐 → 晚餐 排列
+const MEAL_ORDER = { breakfast: 0, lunch: 1, dinner: 2 }
+
+// 找某一周的计划，没有就创建（新增计划项时用）
+function ensurePlan(weekStart) {
+  let plan = plans.find((item) => item.weekStart === weekStart)
+  if (!plan) {
+    plan = { id: planSeedId++, familyId: 1, weekStart }
+    plans.push(plan)
+  }
+  return plan
+}
+
+// 计算某道菜「每份」的预估成本（分）：
+// 食材用量 × 每计价单位价格；g/ml 的 pricePerUnit 是"每 1000 单位"价格，需要 /1000
+function calcRecipeCostFenByServing(recipe) {
+  const totalFen = recipe.ingredients.reduce((sum, row) => {
+    const ingredient = ingredients.find((item) => item.id === row.ingredientId)
+    if (!ingredient) return sum
+    const amount = Number(row.amount) || 0
+    const isWeightOrVolume = ingredient.unitBase === 'g' || ingredient.unitBase === 'ml'
+    const cost = isWeightOrVolume
+      ? (ingredient.pricePerUnit * amount) / 1000
+      : ingredient.pricePerUnit * amount
+    return sum + cost
+  }, 0)
+  // 换算成"每份"成本：基础成本 / 默认份数
+  return Math.round(totalFen / (recipe.baseServings || 1))
+}
+
+// 计划项返回给前端：join 菜谱摘要 + 每份成本（右栏汇总用）
+function toPlanItemResponse(item) {
+  const recipe = recipes.find((row) => row.id === item.recipeId)
+  return {
+    id: item.id,
+    date: item.date,
+    mealType: item.mealType,
+    recipeId: item.recipeId,
+    servings: item.servings,
+    // 每份成本（分）：右栏金额 = Σ unitCostFen × servings
+    unitCostFen: recipe ? calcRecipeCostFenByServing(recipe) : 0,
+    recipe: recipe
+      ? {
+          id: recipe.id,
+          title: recipe.title,
+          cover: recipe.cover,
+          calories: recipe.calories,
+          method: recipe.method,
+          difficulty: recipe.difficulty,
+          timeMin: recipe.timeMin,
+          baseServings: recipe.baseServings,
+        }
+      : { id: item.recipeId, title: '菜谱已删除', cover: '', calories: 0 },
+  }
+}
+
+// 种子上周计划：让「复制上周」一进页面就能验收（日期相对"今天"动态生成）
+function seedLastWeekPlan() {
+  const currentWeekStart = getWeekStart(new Date())
+  const lastWeekStart = addDays(currentWeekStart, -7)
+  const plan = ensurePlan(lastWeekStart)
+  const seedItems = [
+    { offset: 0, mealType: 'breakfast', recipeId: 10, servings: 2 }, // 小米粥
+    { offset: 0, mealType: 'dinner', recipeId: 2, servings: 3 }, // 红烧肉
+    { offset: 1, mealType: 'lunch', recipeId: 1, servings: 2 }, // 番茄炒蛋
+    { offset: 2, mealType: 'dinner', recipeId: 4, servings: 2 }, // 清蒸鲈鱼
+    { offset: 3, mealType: 'lunch', recipeId: 3, servings: 3 }, // 宫保鸡丁
+    { offset: 4, mealType: 'dinner', recipeId: 8, servings: 2 }, // 鱼香肉丝
+  ]
+  seedItems.forEach((item, index) => {
+    planItems.push({
+      id: planItemSeedId++,
+      planId: plan.id,
+      date: addDays(lastWeekStart, item.offset),
+      mealType: item.mealType,
+      recipeId: item.recipeId,
+      servings: item.servings,
+      sort: index,
+    })
+  })
+}
+seedLastWeekPlan()
+
+// 查询某一周计划：按日期 + 餐次排序返回
+function getPlanHandler(config) {
+  const weekStart = String(config.params?.weekStart || getWeekStart(new Date()))
+  const plan = plans.find((item) => item.weekStart === weekStart)
+  const items = plan ? planItems.filter((item) => item.planId === plan.id) : []
+  const sorted = [...items].sort(
+    (a, b) =>
+      a.date.localeCompare(b.date) ||
+      (MEAL_ORDER[a.mealType] ?? 0) - (MEAL_ORDER[b.mealType] ?? 0) ||
+      a.id - b.id,
+  )
+  return { weekStart, items: sorted.map(toPlanItemResponse) }
+}
+
+// 添加计划项：定位到某一周 + 某一天 + 某一餐
+function addPlanItemHandler(config) {
+  const body = parseBody(config)
+  const weekStart = String(body.weekStart || '').trim()
+  if (!weekStart) businessError(400, '缺少周起始日期')
+  if (!body.date || !body.mealType || !body.recipeId) businessError(400, '计划项参数不完整')
+  if (!['breakfast', 'lunch', 'dinner'].includes(body.mealType)) businessError(400, '餐次不合法')
+
+  const recipe = recipes.find((item) => item.id === Number(body.recipeId))
+  if (!recipe) httpError(404, '菜谱不存在')
+
+  const plan = ensurePlan(weekStart)
+  const item = {
+    id: planItemSeedId++,
+    planId: plan.id,
+    date: String(body.date),
+    mealType: body.mealType,
+    recipeId: recipe.id,
+    // 份数限制在 1-10，和前端 el-input-number 保持一致
+    servings: Math.max(1, Math.min(10, Number(body.servings) || 1)),
+    sort: planItems.filter((row) => row.planId === plan.id).length,
+  }
+  planItems.push(item)
+  return toPlanItemResponse(item)
+}
+
+// 修改计划项（S6 主要改份数）
+function updatePlanItemHandler(config, routeParams) {
+  const item = planItems.find((row) => row.id === Number(routeParams.id))
+  if (!item) httpError(404, '计划项不存在')
+  const body = parseBody(config)
+  if (body.servings !== undefined) {
+    item.servings = Math.max(1, Math.min(10, Number(body.servings) || 1))
+  }
+  return toPlanItemResponse(item)
+}
+
+// 删除计划项
+function deletePlanItemHandler(config, routeParams) {
+  const index = planItems.findIndex((row) => row.id === Number(routeParams.id))
+  if (index < 0) httpError(404, '计划项不存在')
+  const [removed] = planItems.splice(index, 1)
+  return { id: removed.id }
+}
+
+// 复制整周计划（mock 端实现；页面按交付物要求走"前端深拷贝 + 批量新增"，此接口保留给真实后端实现）
+function copyPlanHandler(config) {
+  const body = parseBody(config)
+  const fromWeekStart = String(body.fromWeekStart || '')
+  const toWeekStart = String(body.toWeekStart || '')
+  if (!fromWeekStart || !toWeekStart) businessError(400, '缺少周起始日期')
+
+  const sourcePlan = plans.find((item) => item.weekStart === fromWeekStart)
+  const sourceItems = sourcePlan ? planItems.filter((item) => item.planId === sourcePlan.id) : []
+  const targetPlan = ensurePlan(toWeekStart)
+  const sourceStart = parseDate(fromWeekStart)
+
+  sourceItems.forEach((item) => {
+    // 保持"星期几"不变：计算相差天数后加到目标周的周一上
+    const offsetDays = Math.round((parseDate(item.date) - sourceStart) / 86400000)
+    planItems.push({
+      id: planItemSeedId++,
+      planId: targetPlan.id,
+      date: addDays(toWeekStart, offsetDays),
+      mealType: item.mealType,
+      recipeId: item.recipeId,
+      servings: item.servings,
+      sort: item.sort,
+    })
+  })
+  return { copied: sourceItems.length, weekStart: toWeekStart }
+}
+
 // ---------- 认证接口 handler（S2）----------
 
 // 登录：校验用户名/密码/账号状态，成功后返回 token + 用户信息
@@ -374,6 +554,11 @@ const routes = [
   { method: 'post', path: '/recipes/:id/favorite', handler: toggleFavoriteHandler },
   { method: 'get', path: '/categories', handler: getCategoriesHandler },
   { method: 'get', path: '/ingredients', handler: getIngredientsHandler },
+  { method: 'get', path: '/plans', handler: getPlanHandler },
+  { method: 'post', path: '/plans/items', handler: addPlanItemHandler },
+  { method: 'put', path: '/plans/items/:id', handler: updatePlanItemHandler },
+  { method: 'delete', path: '/plans/items/:id', handler: deletePlanItemHandler },
+  { method: 'post', path: '/plans/copy', handler: copyPlanHandler },
   { method: 'post', path: '/auth/login', handler: loginHandler },
   { method: 'get', path: '/auth/me', handler: getMeHandler },
 ]

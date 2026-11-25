@@ -18,6 +18,8 @@ const RecipeDetail = () => import('@/views/family/recipes/detail.vue')
 // S5 管理端菜谱：列表 + 新增/编辑
 const AdminRecipeList = () => import('@/views/admin/recipes/index.vue')
 const AdminRecipeEdit = () => import('@/views/admin/recipes/edit.vue')
+// S6 一周计划
+const MealPlan = () => import('@/views/family/plan/index.vue')
 
 // 不需要登录即可访问的路由（具体放行逻辑在守卫里）
 export const constantRoutes = [
@@ -60,7 +62,7 @@ export const asyncRoutes = [
       {
         path: 'plan',
         name: 'Plan',
-        component: PlaceholderPage,
+        component: MealPlan,
         meta: { title: '一周计划', icon: 'Calendar', roles: ['family'] },
       },
       {

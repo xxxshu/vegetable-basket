@@ -13,6 +13,8 @@ const props = defineProps({
   recipe: { type: Object, required: true },
   // 当前是否已收藏（由父组件从 recipe store 传入）
   favorite: { type: Boolean, default: false },
+  // 是否显示收藏按钮（选菜抽屉等非收藏场景传 false）
+  showFavorite: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['click', 'toggle-favorite'])
@@ -44,8 +46,9 @@ function handleToggleFavorite() {
       <img v-if="recipe.cover" class="recipe-card__img" :src="recipe.cover" :alt="recipe.title" />
       <span v-else class="recipe-card__cover-placeholder">{{ coverText }}</span>
 
-      <!-- 收藏按钮：绝对定位在封面右上角，点击时阻止冒泡 -->
+      <!-- 收藏按钮：绝对定位在封面右上角，点击时阻止冒泡（选菜抽屉等场景可不显示） -->
       <button
+        v-if="showFavorite"
         class="recipe-card__favorite"
         :class="{ 'is-active': favorite }"
         type="button"
