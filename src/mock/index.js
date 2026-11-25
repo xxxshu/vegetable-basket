@@ -9,6 +9,10 @@
 import { AxiosError } from 'axios'
 
 import recipes from './data/recipes.json'
+import users from './data/users.json'
+
+// 模拟 token 前缀：mock 环境没有真服务端 session，用 "mock-token-用户名" 让刷新页面后仍能找回用户
+const MOCK_TOKEN_PREFIX = 'mock-token-'
 
 // 模拟网络延迟（毫秒）：保留"请求需要时间"的真实体感，便于后面验证 loading 态
 const MOCK_DELAY = 200
@@ -18,6 +22,55 @@ const MOCK_MESSAGES = {
   401: '登录已过期，请重新登录',
   403: '没有权限访问该资源',
   500: '服务器开小差了，请稍后重试',
+}
+
+// ---------- 认证接口用到的工具（S2）----------
+
+// 业务错误：HTTP 200 + code != 0（如密码错误），走响应拦截器的业务失败分支
+function businessError(code, message) {
+  const error = new Error(message)
+  error.businessCode = code
+  throw error
+}
+
+// HTTP 错误：真正返回非 2xx（如 token 失效的 401），走响应拦截器的错误分支
+function httpError(status, message) {
+  const error = new Error(message)
+  error.httpStatus = status
+  throw error
+}
+
+// 解析请求体：axios 默认把对象转成 JSON 字符串，这里同时兼容对象与字符串两种形态
+function parseBody(config) {
+  if (!config.data) return {}
+  if (typeof config.data === 'string') {
+    try {
+      return JSON.parse(config.data)
+    } catch {
+      return {}
+    }
+  }
+  return config.data
+}
+
+// 从请求头取 token：兼容 AxiosHeaders 实例（有 get 方法）与普通对象
+function getBearerToken(config) {
+  const headers = config.headers || {}
+  const authorization =
+    typeof headers.get === 'function' ? headers.get('Authorization') : headers.Authorization
+  if (!authorization) return ''
+  return String(authorization).replace(/^Bearer\s+/i, '')
+}
+
+// 只返回前端需要的字段：密码绝对不能出现在响应里
+function toUserInfo(user) {
+  return {
+    id: user.id,
+    username: user.username,
+    nickname: user.nickname,
+    avatar: user.avatar,
+    role: user.role,
+  }
 }
 
 // 菜谱列表排序器：sort 参数 → 比较函数（S4 菜谱库的排序下拉沿用这套取值）
@@ -89,8 +142,42 @@ function getRecipeListHandler(config) {
   return { list: pageList, total, page, pageSize }
 }
 
+// ---------- 认证接口 handler（S2）----------
+
+// 登录：校验用户名/密码/账号状态，成功后返回 token + 用户信息
+function loginHandler(config) {
+  const { username = '', password = '' } = parseBody(config)
+  const user = users.find((item) => item.username === username)
+
+  // 用户名或密码错误：业务错误（HTTP 200 + code 400），让拦截器统一弹出 message
+  if (!user || user.password !== password) businessError(400, '用户名或密码错误')
+  // 账号被禁用：业务错误 403
+  if (user.status !== 1) businessError(403, '账号已被禁用，请联系管理员')
+
+  // token 里带用户名：刷新页面后 mock 仍能根据 token 找回用户（不需要服务端 session）
+  return {
+    token: `${MOCK_TOKEN_PREFIX}${user.username}`,
+    userInfo: toUserInfo(user),
+  }
+}
+
+// 获取当前用户：校验 Authorization 里的 token，无效返回 401（交给拦截器做登录过期处理）
+function getMeHandler(config) {
+  const token = getBearerToken(config)
+  const user = token.startsWith(MOCK_TOKEN_PREFIX)
+    ? users.find((item) => item.username === token.slice(MOCK_TOKEN_PREFIX.length))
+    : null
+
+  if (!user || user.status !== 1) httpError(401, '登录已过期，请重新登录')
+  return toUserInfo(user)
+}
+
 // 路由表：method + 路径精确匹配；S1 只实现菜谱列表，其余接口随阶段逐个补充
-const routes = [{ method: 'get', path: '/recipes', handler: getRecipeListHandler }]
+const routes = [
+  { method: 'get', path: '/recipes', handler: getRecipeListHandler },
+  { method: 'post', path: '/auth/login', handler: loginHandler },
+  { method: 'get', path: '/auth/me', handler: getMeHandler },
+]
 
 // 读取注入的模拟状态码：优先请求头 x-mock-status，其次查询参数 _mockStatus
 function getInjectedStatus(config) {
@@ -142,11 +229,22 @@ export default async function mockAdapter(config) {
     return Promise.reject(buildErrorResponse(config, 404, '接口不存在（mock 未定义）'))
   }
 
-  // 4. 正常处理：handler 内抛错按 500 处理，保证页面永远拿到统一的错误结构
+  // 4. 正常处理：handler 内抛错按错误类型区分处理，保证页面拿到统一的结构
   try {
     const data = route.handler(config)
     return Promise.resolve(buildSuccessResponse(config, { code: 0, message: 'ok', data }))
   } catch (error) {
+    // 业务错误：HTTP 200 + code != 0（如登录密码错误），交给响应拦截器的业务失败分支
+    if (error.businessCode) {
+      return Promise.resolve(
+        buildSuccessResponse(config, { code: error.businessCode, message: error.message }),
+      )
+    }
+    // HTTP 错误：真正返回非 2xx（如 token 失效的 401），交给响应拦截器的错误分支
+    if (error.httpStatus) {
+      return Promise.reject(buildErrorResponse(config, error.httpStatus, error.message))
+    }
+    // 其它未知异常：统一按 500 处理
     console.warn(`[mock] 接口处理异常：${method.toUpperCase()} ${path}`, error)
     return Promise.reject(buildErrorResponse(config, 500, MOCK_MESSAGES[500]))
   }

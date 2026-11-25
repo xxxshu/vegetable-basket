@@ -1,23 +1,16 @@
-// 路由实例：S0 阶段只放一条占位路由，用于验证"地址 → 页面"链路能跑通；
-// 完整路由表、meta.roles 权限、动态注册、404 兜底都留到 S2 实现
+// 路由实例：初始路由表为空，登录页等常量路由由守卫初始化时注册，业务路由登录后按角色动态 addRoute
 import { createRouter, createWebHistory } from 'vue-router'
 
-// 占位页：S0 验收用，S1/S2 引入真实页面后删除
-// 文件名取 PlaceholderPage（多单词），以符合 ESLint 的 vue/multi-word-component-names 规则
-import PlaceholderPage from '@/views/PlaceholderPage.vue'
+import { setupRouterGuard } from './guard'
 
 const router = createRouter({
-  // history 模式：地址栏是 /recipes 这种真实路径（不带 #），部署时需要服务器回退到 index.html
+  // history 模式：地址栏是真实路径（不带 #），部署时服务器需回退到 index.html
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'Placeholder',
-      component: PlaceholderPage,
-      // meta.title 约定从 S2 起用于浏览器标题与面包屑，这里先占位
-      meta: { title: '项目骨架' },
-    },
-  ],
+  // 初始空表：未登录时只有守卫注册的 /login 可访问，访问其它地址会被拦截
+  routes: [],
 })
+
+// 安装全局守卫（登录校验 + 动态路由注册 + 404 兜底 + 无权限提示）
+setupRouterGuard(router)
 
 export default router

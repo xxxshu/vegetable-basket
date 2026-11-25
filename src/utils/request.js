@@ -1,8 +1,44 @@
 // 统一请求层：所有网络请求都必须经过这里（页面里禁止直接使用 axios）
 // 职责：创建实例 → 挂载 Mock adapter（开发期）→ 请求/响应双拦截器
+// 注意：这里 import 了 router 与 user store，会和它们形成"互相引用"的循环依赖；
+//       但都只在运行时（发请求/401 时）使用，不在模块顶层立即调用，因此不会有初始化问题。
 import axios from 'axios'
 
 import mockAdapter from '@/mock'
+import router from '@/router'
+import { useUserStore } from '@/stores'
+
+// 并发 401 去重标志：多个请求同时过期时，只跳一次登录页、只提示一次
+let isRedirecting = false
+
+/**
+ * 统一处理 401（未登录 / token 过期）。
+ * 副作用：清空登录态、提示一次、跳转登录页（带上当前地址，登录后可回跳）。
+ * 并发去重：isRedirecting 为 true 时直接返回，避免多个请求各自弹提示/重复跳转。
+ */
+function handleUnauthorized() {
+  // 已经在处理中：后续并发的 401 直接忽略
+  if (isRedirecting) return
+  isRedirecting = true
+
+  // 提示只弹一次：文案与"被拦截到登录页"的语义一致
+  ElMessage.warning('登录已过期，请重新登录')
+
+  // 清空 token / userInfo（动态路由由路由守卫在下次导航时清理）
+  const userStore = useUserStore()
+  userStore.resetAuth()
+
+  const currentRoute = router.currentRoute.value
+  // 已经在登录页就不用再跳，避免重复导航
+  if (currentRoute.path === '/login') {
+    isRedirecting = false
+    return
+  }
+  router.replace({ path: '/login', query: { redirect: currentRoute.fullPath } }).finally(() => {
+    // 跳转完成后释放标志，允许下一次真正需要时再跳
+    isRedirecting = false
+  })
+}
 
 // 1. 创建 axios 实例：baseURL 与 Mock 开关都来自环境变量（.env.development / .env.production）
 const request = axios.create({
@@ -16,11 +52,14 @@ if (import.meta.env.VITE_USE_MOCK === 'true') {
   request.defaults.adapter = mockAdapter
 }
 
-// 3. 请求拦截器：S2 登录后在这里统一携带 token
+// 3. 请求拦截器：登录后每个请求自动携带 token
 request.interceptors.request.use(
   (config) => {
-    // TODO(S2): 登录态做好后，在这里从 user store 取 token 写入请求头
-    // config.headers.Authorization = `Bearer ${userStore.token}`
+    // 从 user store 取 token（持久化插件保证刷新页面后仍在）
+    const userStore = useUserStore()
+    if (userStore.token) {
+      config.headers.Authorization = `Bearer ${userStore.token}`
+    }
     return config
   },
   (error) => Promise.reject(error),
@@ -37,8 +76,12 @@ request.interceptors.response.use(
     return Promise.reject(new Error(message || '服务异常'))
   },
   (error) => {
-    // TODO(S2): 401 未登录 / token 过期 → 清空登录态并跳转登录页（依赖 router 与 user store）
-    // 网络错误 / HTTP 非 2xx：优先展示后端返回的 message，没有则兜底"网络异常"
+    // 401 未登录 / token 过期：统一清理登录态并跳转登录页（并发请求只处理一次）
+    if (error.response?.status === 401) {
+      handleUnauthorized()
+      return Promise.reject(error)
+    }
+    // 网络错误 / 其他 HTTP 非 2xx：优先展示后端返回的 message，没有则兜底"网络异常"
     ElMessage.error(error.response?.data?.message || '网络异常')
     return Promise.reject(error)
   },
