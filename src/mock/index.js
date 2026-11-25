@@ -8,6 +8,8 @@
 // - 金额统一留到 S7 用整数运算，避免浮点误差。
 import { AxiosError } from 'axios'
 
+import categories from './data/categories.json'
+import ingredients from './data/ingredients.json'
 import recipes from './data/recipes.json'
 import users from './data/users.json'
 
@@ -82,14 +84,17 @@ const SORTERS = {
   'calories-desc': (a, b) => b.calories - a.calories,
 }
 
-// 列表只返回卡片需要的字段：完整配方与步骤由后续的 GET /recipes/:id 提供（S4）
+// 列表只返回卡片需要的字段：完整配方与步骤由 GET /recipes/:id 提供（S4）
 function toRecipeSummary(recipe) {
+  // 品类名用于卡片标签展示（列表里只存 categoryId，这里 join 出名称）
+  const categoryName = categories.find((item) => item.id === recipe.categoryId)?.name || ''
   return {
     id: recipe.id,
     title: recipe.title,
     cover: recipe.cover,
     description: recipe.description,
     categoryId: recipe.categoryId,
+    categoryName,
     method: recipe.method,
     difficulty: recipe.difficulty,
     calories: recipe.calories,
@@ -142,6 +147,38 @@ function getRecipeListHandler(config) {
   return { list: pageList, total, page, pageSize }
 }
 
+// ---------- 菜谱详情 / 收藏 handler（S4）----------
+
+// mock 内存里的收藏集合：让接口"看起来可用"；真正的收藏状态以 Pinia 持久化为准
+const favoriteRecipeIds = new Set()
+
+// 详情：返回完整配方（食材 join 出名称与基准单位），不存在或已下架返回 404
+function getRecipeDetailHandler(config, routeParams) {
+  const recipe = recipes.find((item) => item.id === Number(routeParams.id))
+  if (!recipe || recipe.status !== 1) httpError(404, '菜谱不存在或已下架')
+
+  const categoryName = categories.find((item) => item.id === recipe.categoryId)?.name || ''
+  const detailIngredients = recipe.ingredients.map((row) => {
+    const ingredient = ingredients.find((item) => item.id === row.ingredientId)
+    return {
+      ...row,
+      name: ingredient?.name || '',
+      unitBase: ingredient?.unitBase || '',
+    }
+  })
+  return { ...recipe, categoryName, ingredients: detailIngredients }
+}
+
+// 切换收藏：返回最新收藏状态（前端再把结果写进 recipe store）
+function toggleFavoriteHandler(config, routeParams) {
+  const recipeId = Number(routeParams.id)
+  if (!recipes.some((item) => item.id === recipeId)) httpError(404, '菜谱不存在')
+
+  if (favoriteRecipeIds.has(recipeId)) favoriteRecipeIds.delete(recipeId)
+  else favoriteRecipeIds.add(recipeId)
+  return { favorite: favoriteRecipeIds.has(recipeId) }
+}
+
 // ---------- 认证接口 handler（S2）----------
 
 // 登录：校验用户名/密码/账号状态，成功后返回 token + 用户信息
@@ -172,12 +209,58 @@ function getMeHandler(config) {
   return toUserInfo(user)
 }
 
-// 路由表：method + 路径精确匹配；S1 只实现菜谱列表，其余接口随阶段逐个补充
+// 路由表：method + 路径匹配；带 :id 的动态段由 findRoute 用正则匹配，其余接口随阶段补充
 const routes = [
   { method: 'get', path: '/recipes', handler: getRecipeListHandler },
+  { method: 'get', path: '/recipes/:id', handler: getRecipeDetailHandler },
+  { method: 'post', path: '/recipes/:id/favorite', handler: toggleFavoriteHandler },
   { method: 'post', path: '/auth/login', handler: loginHandler },
   { method: 'get', path: '/auth/me', handler: getMeHandler },
 ]
+
+// 把带动态段的路由路径编译成正则 + 参数名：
+// '/recipes/:id' → { keys: ['id'], regex: /^\/recipes\/([^/]+)\/?$/ }
+function compileRoutePath(path) {
+  const keys = []
+  const segments = path
+    .split('/')
+    .filter(Boolean)
+    .map((segment) => {
+      if (segment.startsWith(':')) {
+        keys.push(segment.slice(1))
+        return '([^/]+)'
+      }
+      // 静态段：转义正则特殊字符后原样匹配
+      return segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    })
+  return { keys, regex: new RegExp(`^/${segments.join('/')}/?$`) }
+}
+
+const compiledRoutes = routes.map((route) => ({ ...route, ...compileRoutePath(route.path) }))
+
+/**
+ * 匹配请求路由
+ * 先做静态路径精确匹配（保证 /recipes 不会被 /recipes/:id 抢走），再按顺序匹配动态路由
+ * @param {string} method 请求方法（小写）
+ * @param {string} path 请求路径（不含查询串）
+ * @returns {{ route: object, params: object } | null}
+ */
+function findRoute(method, path) {
+  const staticRoute = routes.find((item) => item.method === method && item.path === path)
+  if (staticRoute) return { route: staticRoute, params: {} }
+
+  for (const item of compiledRoutes) {
+    if (item.method !== method) continue
+    const result = item.regex.exec(path)
+    if (!result) continue
+    const params = {}
+    item.keys.forEach((key, index) => {
+      params[key] = result[index + 1]
+    })
+    return { route: item, params }
+  }
+  return null
+}
 
 // 读取注入的模拟状态码：优先请求头 x-mock-status，其次查询参数 _mockStatus
 function getInjectedStatus(config) {
@@ -215,7 +298,7 @@ export default async function mockAdapter(config) {
 
   const method = String(config.method || 'get').toLowerCase()
   const path = String(config.url || '').split('?')[0]
-  const route = routes.find((item) => item.method === method && item.path === path)
+  const matched = findRoute(method, path)
 
   // 2. 错误注入：用于验证拦截器的错误分支（例如注入 500 时页面是否弹 ElMessage.error）
   const injectedStatus = getInjectedStatus(config)
@@ -224,14 +307,15 @@ export default async function mockAdapter(config) {
   }
 
   // 3. 未定义的接口：返回 404 + 控制台警告，方便第一时间发现接口路径写错
-  if (!route) {
+  if (!matched) {
     console.warn(`[mock] 未定义的接口：${method.toUpperCase()} ${path}`)
     return Promise.reject(buildErrorResponse(config, 404, '接口不存在（mock 未定义）'))
   }
 
   // 4. 正常处理：handler 内抛错按错误类型区分处理，保证页面拿到统一的结构
   try {
-    const data = route.handler(config)
+    // 第二个参数是路径参数（如 { id: '3' }），静态路由时为空对象
+    const data = matched.route.handler(config, matched.params)
     return Promise.resolve(buildSuccessResponse(config, { code: 0, message: 'ok', data }))
   } catch (error) {
     // 业务错误：HTTP 200 + code != 0（如登录密码错误），交给响应拦截器的业务失败分支

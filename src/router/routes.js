@@ -13,6 +13,9 @@ const LoginPage = () => import('@/views/login/index.vue')
 const NotFoundPage = () => import('@/views/NotFoundPage.vue')
 // 临时演示页：仅用于 S3 验收公共组件，S4/S5 真实页面接入后删除
 const DemoPage = () => import('@/views/DemoPage.vue')
+// S4 菜谱库：列表 + 详情
+const RecipeList = () => import('@/views/family/recipes/index.vue')
+const RecipeDetail = () => import('@/views/family/recipes/detail.vue')
 
 // 不需要登录即可访问的路由（具体放行逻辑在守卫里）
 export const constantRoutes = [
@@ -42,14 +45,14 @@ export const asyncRoutes = [
       {
         path: 'recipes',
         name: 'Recipes',
-        component: PlaceholderPage,
+        component: RecipeList,
         meta: { title: '菜谱库', icon: 'Dish', roles: ['family', 'admin'] },
       },
       {
         // 详情页不出现在菜单里，只能从列表点进来
         path: 'recipes/:id',
         name: 'RecipeDetail',
-        component: PlaceholderPage,
+        component: RecipeDetail,
         meta: { title: '菜谱详情', roles: ['family', 'admin'], hidden: true },
       },
       {
