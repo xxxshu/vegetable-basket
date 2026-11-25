@@ -1,18 +1,18 @@
 <!--
   菜谱库（前台，S4）：
-  - 搜索筛选：关键词（防抖 300ms）+ 烹饪方式 + 品类 + 难度 + 排序 + 重置
-    （搜索表单结构按开发文档 6.3；S5 会抽成通用 SearchForm 组件）
+  - 搜索筛选：通用 SearchForm（关键词防抖 300ms + 烹饪方式 + 品类 + 难度 + 排序 + 重置）
   - 卡片网格 4 列 + 分页 + 骨架屏 + 空态/错误重试
   - 收藏状态来自 recipe store（持久化）
 -->
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getRecipeList, toggleFavorite } from '@/api/recipe'
 import EmptyState from '@/components/EmptyState.vue'
 import PageContainer from '@/components/PageContainer.vue'
 import RecipeCard from '@/components/RecipeCard.vue'
+import SearchForm from '@/components/SearchForm.vue'
 import { useDebounce } from '@/composables/useDebounce'
 import { useRecipeStore } from '@/stores'
 import { DIFFICULTY, ING_CATEGORIES, METHODS } from '@/utils/constants'
@@ -20,8 +20,8 @@ import { DIFFICULTY, ING_CATEGORIES, METHODS } from '@/utils/constants'
 const router = useRouter()
 const recipeStore = useRecipeStore()
 
-// 筛选条件：全部来自开发文档 6.3 的搜索区结构
-const filters = reactive({
+// 筛选条件：ref 对象便于 SearchForm 通过 v-model 整体同步
+const filters = ref({
   keyword: '',
   method: '',
   categoryId: '',
@@ -42,6 +42,21 @@ const methodOptions = METHODS.map((name) => ({ label: name, value: name }))
 const difficultyOptions = DIFFICULTY.map((name, index) => ({ label: name, value: index + 1 }))
 const categoryOptions = ING_CATEGORIES.map((name, index) => ({ label: name, value: index + 1 }))
 
+// 搜索表单配置（SearchForm 消费）：结构与开发文档 6.3 的搜索区一致
+const filterFields = [
+  {
+    type: 'input',
+    label: '关键词',
+    prop: 'keyword',
+    placeholder: '搜索菜名 / 简介',
+    width: '220px',
+  },
+  { type: 'select', label: '烹饪方式', prop: 'method', options: methodOptions, width: '130px' },
+  { type: 'select', label: '品类', prop: 'categoryId', options: categoryOptions, width: '120px' },
+  { type: 'select', label: '难度', prop: 'difficulty', options: difficultyOptions, width: '110px' },
+  { type: 'select', label: '排序', prop: 'sort', options: sortOptions, width: '150px' },
+]
+
 // 列表数据与加载状态
 const list = ref([])
 const total = ref(0)
@@ -59,7 +74,7 @@ async function fetchList() {
   loadFailed.value = false
   try {
     const data = await getRecipeList({
-      ...filters,
+      ...filters.value,
       page: page.value,
       pageSize: pageSize.value,
     })
@@ -87,7 +102,7 @@ const { run: runSearch, cancel: cancelSearch } = useDebounce(() => {
  * - 其它条件变化 / 多个条件同时变化 → 立即重置到第 1 页并请求（并取消未执行的防抖）
  */
 watch(
-  () => ({ ...filters }),
+  () => ({ ...filters.value }),
   (next, prev) => {
     const onlyKeywordChanged =
       next.keyword !== prev.keyword &&
@@ -114,18 +129,18 @@ function handleSearchNow() {
 }
 
 /**
- * 重置全部筛选条件：回到默认值，由上面的 watch 统一处理"回到第 1 页 + 重新请求"
- * （reset 时先取消防抖，避免关键词的防抖计时器再补一次请求）
+ * 清空全部筛选条件：回到默认值，由上面的 watch 统一处理"回到第 1 页 + 重新请求"
+ * （先取消防抖，避免关键词的防抖计时器再补一次请求）
  */
-function handleReset() {
+function handleClearFilters() {
   cancelSearch()
-  Object.assign(filters, {
+  filters.value = {
     keyword: '',
     method: '',
     categoryId: '',
     difficulty: '',
     sort: 'default',
-  })
+  }
 }
 
 /** 翻页：请求新页数据并回到页面顶部 */
@@ -173,71 +188,14 @@ onMounted(fetchList)
       <span class="recipes__count">共 {{ total }} 道菜谱</span>
     </template>
 
-    <!-- 搜索筛选区（结构按开发文档 6.3；S5 抽成通用 SearchForm） -->
-    <el-form class="recipes__search" :inline="true" @submit.prevent>
-      <el-form-item label="关键词">
-        <el-input
-          v-model="filters.keyword"
-          class="recipes__keyword"
-          placeholder="搜索菜名 / 简介"
-          clearable
-          @keyup.enter="handleSearchNow"
-        />
-      </el-form-item>
-      <el-form-item label="烹饪方式">
-        <el-select v-model="filters.method" class="recipes__select" placeholder="全部" clearable>
-          <el-option
-            v-for="item in methodOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="品类">
-        <el-select
-          v-model="filters.categoryId"
-          class="recipes__select"
-          placeholder="全部"
-          clearable
-        >
-          <el-option
-            v-for="item in categoryOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="难度">
-        <el-select
-          v-model="filters.difficulty"
-          class="recipes__select"
-          placeholder="全部"
-          clearable
-        >
-          <el-option
-            v-for="item in difficultyOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="排序">
-        <el-select v-model="filters.sort" class="recipes__select">
-          <el-option
-            v-for="item in sortOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleReset">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <!-- 搜索筛选区：通用 SearchForm（实时查询 + 关键词防抖；隐藏"查询"按钮） -->
+    <SearchForm
+      v-model="filters"
+      :fields="filterFields"
+      :show-search="false"
+      @search="handleSearchNow"
+      @reset="cancelSearch"
+    />
 
     <!-- 错误态：请求失败，提供重新加载 -->
     <EmptyState
@@ -252,7 +210,7 @@ onMounted(fetchList)
       v-else-if="!loading && list.length === 0"
       description="没有找到符合条件的菜谱"
       action-text="清空筛选"
-      @action="handleReset"
+      @action="handleClearFilters"
     />
 
     <!-- 骨架屏：加载中显示与卡片同形的占位 -->
@@ -304,23 +262,6 @@ onMounted(fetchList)
 .recipes__count {
   font-size: $font-size-sm;
   color: $text-secondary;
-}
-
-// 搜索区：底部留白，与卡片网格分开
-.recipes__search {
-  padding-bottom: $spacing-md;
-  margin-bottom: $spacing-md;
-  border-bottom: 1px dashed $border-color-light;
-}
-
-// 关键词输入框宽度
-.recipes__keyword {
-  width: 220px;
-}
-
-// 下拉框宽度
-.recipes__select {
-  width: 140px;
 }
 
 // 卡片网格：4 列等宽，窄屏自动减少列数

@@ -10,6 +10,9 @@ export const ING_CATEGORIES = ['蔬菜', '肉禽', '水产', '蛋奶', '主食',
 // 难度：数组下标 + 1 才是接口里的 difficulty 值（1 简单 / 2 普通 / 3 困难）
 export const DIFFICULTY = ['简单', '普通', '困难']
 
+// 食材用量单位：菜谱编辑页「食材动态行」的单位下拉；不可互相换算的单位（根/把/片/只）S7 单独分组
+export const UNITS = ['g', 'ml', '个', '根', '片', '把', '只']
+
 // 餐次：一周计划表格的列头文案
 export const MEAL_LABEL = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }
 

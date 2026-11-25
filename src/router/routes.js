@@ -11,11 +11,13 @@ const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 const PlaceholderPage = () => import('@/views/PlaceholderPage.vue')
 const LoginPage = () => import('@/views/login/index.vue')
 const NotFoundPage = () => import('@/views/NotFoundPage.vue')
-// 临时演示页：仅用于 S3 验收公共组件，S4/S5 真实页面接入后删除
-const DemoPage = () => import('@/views/DemoPage.vue')
+// 临时演示页：S3 用于验收公共组件，S5 起公共组件已在真实页面使用，演示页已删除
 // S4 菜谱库：列表 + 详情
 const RecipeList = () => import('@/views/family/recipes/index.vue')
 const RecipeDetail = () => import('@/views/family/recipes/detail.vue')
+// S5 管理端菜谱：列表 + 新增/编辑
+const AdminRecipeList = () => import('@/views/admin/recipes/index.vue')
+const AdminRecipeEdit = () => import('@/views/admin/recipes/edit.vue')
 
 // 不需要登录即可访问的路由（具体放行逻辑在守卫里）
 export const constantRoutes = [
@@ -85,13 +87,6 @@ export const asyncRoutes = [
         component: PlaceholderPage,
         meta: { title: '家庭设置', icon: 'Setting', roles: ['family'] },
       },
-      {
-        // 临时演示页（隐藏菜单）：S3 验收公共组件用
-        path: 'demo',
-        name: 'ComponentDemo',
-        component: DemoPage,
-        meta: { title: '组件演示', roles: ['family', 'admin'], hidden: true },
-      },
     ],
   },
   {
@@ -104,13 +99,13 @@ export const asyncRoutes = [
       {
         path: 'recipes',
         name: 'AdminRecipes',
-        component: PlaceholderPage,
+        component: AdminRecipeList,
         meta: { title: '菜谱管理', icon: 'Dish', roles: ['admin'] },
       },
       {
         path: 'recipes/edit/:id?',
         name: 'AdminRecipeEdit',
-        component: PlaceholderPage,
+        component: AdminRecipeEdit,
         meta: { title: '编辑菜谱', roles: ['admin'], hidden: true },
       },
       {

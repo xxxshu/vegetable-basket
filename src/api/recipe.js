@@ -27,3 +27,43 @@ export function getRecipeDetail(id) {
 export function toggleFavorite(id) {
   return request.post(`/recipes/${id}/favorite`)
 }
+
+// ---------- 管理端 CRUD（S5）----------
+
+/**
+ * 新增菜谱
+ * @param {object} data 菜谱表单数据（含 ingredients / steps）
+ * @returns {Promise<object>} 新建后的菜谱
+ */
+export function createRecipe(data) {
+  return request.post('/recipes', data)
+}
+
+/**
+ * 更新菜谱
+ * @param {number|string} id 菜谱 id
+ * @param {object} data 菜谱表单数据（含 ingredients / steps）
+ * @returns {Promise<object>} 更新后的菜谱
+ */
+export function updateRecipe(id, data) {
+  return request.put(`/recipes/${id}`, data)
+}
+
+/**
+ * 删除菜谱
+ * @param {number|string} id 菜谱 id
+ * @returns {Promise<{ id: number }>}
+ */
+export function deleteRecipe(id) {
+  return request.delete(`/recipes/${id}`)
+}
+
+/**
+ * 更新菜谱上下架状态
+ * @param {number|string} id 菜谱 id
+ * @param {number} status 1=上架，0=下架
+ * @returns {Promise<{ id: number, status: number }>}
+ */
+export function updateRecipeStatus(id, status) {
+  return request.put(`/recipes/${id}/status`, { status })
+}

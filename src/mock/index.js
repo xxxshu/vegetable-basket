@@ -75,7 +75,13 @@ function toUserInfo(user) {
   }
 }
 
-// 菜谱列表排序器：sort 参数 → 比较函数（S4 菜谱库的排序下拉沿用这套取值）
+// 从请求头 token 反查当前 mock 用户：用于区分家庭用户 / 管理员的数据范围
+function getCurrentMockUser(config) {
+  const token = getBearerToken(config)
+  if (!token.startsWith(MOCK_TOKEN_PREFIX)) return null
+  const username = token.slice(MOCK_TOKEN_PREFIX.length)
+  return users.find((item) => item.username === username) || null
+}
 const SORTERS = {
   default: (a, b) => a.id - b.id,
   'time-asc': (a, b) => a.timeMin - b.timeMin,
@@ -117,8 +123,15 @@ function getRecipeListHandler(config) {
   const difficulty =
     params.difficulty === undefined || params.difficulty === '' ? null : Number(params.difficulty)
 
-  // 前台菜谱库只展示已上架（status=1）的菜谱；管理端后续会带 status 参数查询全部
-  let list = recipes.filter((recipe) => recipe.status === 1)
+  // 数据范围：家庭用户只看已上架（status=1）；管理员默认看全部，可用 status 参数再筛
+  const currentUser = getCurrentMockUser(config)
+  const isAdmin = currentUser?.role === 'admin'
+  const statusParam =
+    params.status === undefined || params.status === '' ? null : Number(params.status)
+  let list = recipes.filter((recipe) => {
+    if (statusParam !== null) return recipe.status === statusParam
+    return isAdmin ? true : recipe.status === 1
+  })
 
   // 关键词：标题或简介包含即命中（转小写比较，兼容英文关键词）
   if (keyword) {
@@ -152,10 +165,12 @@ function getRecipeListHandler(config) {
 // mock 内存里的收藏集合：让接口"看起来可用"；真正的收藏状态以 Pinia 持久化为准
 const favoriteRecipeIds = new Set()
 
-// 详情：返回完整配方（食材 join 出名称与基准单位），不存在或已下架返回 404
+// 详情：返回完整配方（食材 join 出名称与基准单位），家庭用户看不到下架菜谱
 function getRecipeDetailHandler(config, routeParams) {
   const recipe = recipes.find((item) => item.id === Number(routeParams.id))
-  if (!recipe || recipe.status !== 1) httpError(404, '菜谱不存在或已下架')
+  const isAdmin = getCurrentMockUser(config)?.role === 'admin'
+  // 管理员需要编辑下架菜谱，允许查看；家庭用户只看上架菜谱
+  if (!recipe || (!isAdmin && recipe.status !== 1)) httpError(404, '菜谱不存在或已下架')
 
   const categoryName = categories.find((item) => item.id === recipe.categoryId)?.name || ''
   const detailIngredients = recipe.ingredients.map((row) => {
@@ -177,6 +192,145 @@ function toggleFavoriteHandler(config, routeParams) {
   if (favoriteRecipeIds.has(recipeId)) favoriteRecipeIds.delete(recipeId)
   else favoriteRecipeIds.add(recipeId)
   return { favorite: favoriteRecipeIds.has(recipeId) }
+}
+
+// ---------- 字典接口 handler（S5，管理端编辑页下拉用）----------
+
+// 分类字典：可按 type 过滤（ingredient=食材品类 / method=烹饪方式）
+function getCategoriesHandler(config) {
+  const type = config.params?.type
+  return categories.filter((item) => (type ? item.type === type : true))
+}
+
+// 食材字典：编辑页的食材下拉 + 后续聚合都从这里取
+function getIngredientsHandler() {
+  return ingredients
+}
+
+// ---------- 菜谱 CRUD handler（S5，直接操作内存数组让增删改真的生效）----------
+
+// 取列表里下一个可用 id（现有最大值 + 1）
+function nextId(list) {
+  return list.reduce((max, item) => Math.max(max, item.id), 0) + 1
+}
+
+// 取所有菜谱配方行 / 步骤行里的下一个可用 id（保证新增行不与旧行冲突）
+function nextGlobalRowId(key) {
+  let max = 0
+  recipes.forEach((recipe) => {
+    recipe[key].forEach((row) => {
+      max = Math.max(max, row.id)
+    })
+  })
+  return max + 1
+}
+
+// 校验并整理菜谱表单（新增/编辑共用）：返回基础字段 + 配方行/步骤行
+function normalizeRecipePayload(body) {
+  const title = String(body.title || '').trim()
+  if (!title) businessError(400, '菜谱名称不能为空')
+  if (!body.categoryId) businessError(400, '请选择菜谱分类')
+  if (!body.method) businessError(400, '请选择烹饪方式')
+  if (!body.difficulty) businessError(400, '请选择难度')
+
+  const ingredientsInput = Array.isArray(body.ingredients) ? body.ingredients : []
+  if (ingredientsInput.length === 0) businessError(400, '至少需要一条食材')
+  const ingredientRows = ingredientsInput.map((row, index) => {
+    if (!row.ingredientId) businessError(400, `第 ${index + 1} 行食材未选择`)
+    if (!(Number(row.amount) > 0)) businessError(400, `第 ${index + 1} 行食材用量必须大于 0`)
+    return {
+      ingredientId: Number(row.ingredientId),
+      amount: Number(row.amount),
+      unit: row.unit || 'g',
+      perServings: Number(body.baseServings) || 2,
+      optional: Boolean(row.optional),
+    }
+  })
+
+  const stepsInput = Array.isArray(body.steps) ? body.steps : []
+  if (stepsInput.length === 0) businessError(400, '至少需要一个步骤')
+  const stepRows = stepsInput.map((step, index) => {
+    const content = String(step.content || '').trim()
+    if (!content) businessError(400, `第 ${index + 1} 步内容不能为空`)
+    return { order: index + 1, content, durationMin: Number(step.durationMin) || 0 }
+  })
+
+  return {
+    base: {
+      title,
+      cover: body.cover || '',
+      description: String(body.description || '').trim(),
+      categoryId: Number(body.categoryId),
+      method: body.method,
+      difficulty: Number(body.difficulty),
+      calories: Number(body.calories) || 0,
+      protein: Number(body.protein) || 0,
+      fat: Number(body.fat) || 0,
+      carb: Number(body.carb) || 0,
+      fiber: Number(body.fiber) || 0,
+      sodium: Number(body.sodium) || 0,
+      timeMin: Number(body.timeMin) || 0,
+      baseServings: Number(body.baseServings) || 2,
+      status: Number(body.status) === 0 ? 0 : 1,
+    },
+    ingredientRows,
+    stepRows,
+  }
+}
+
+// 把「基础字段 + 配方行/步骤行」组装成完整菜谱对象（分配行 id）
+function buildRecipe(id, payload) {
+  let ingredientRowId = nextGlobalRowId('ingredients')
+  let stepRowId = nextGlobalRowId('steps')
+  return {
+    id,
+    ...payload.base,
+    ingredients: payload.ingredientRows.map((row) => ({
+      id: ingredientRowId++,
+      recipeId: id,
+      ...row,
+    })),
+    steps: payload.stepRows.map((row) => ({
+      id: stepRowId++,
+      recipeId: id,
+      ...row,
+    })),
+  }
+}
+
+// 新增菜谱：push 进内存数组，列表立刻能查到
+function createRecipeHandler(config) {
+  const payload = normalizeRecipePayload(parseBody(config))
+  const recipe = buildRecipe(nextId(recipes), payload)
+  recipes.push(recipe)
+  return recipe
+}
+
+// 更新菜谱：替换内存数组里的那一条（配方行/步骤行重新生成）
+function updateRecipeHandler(config, routeParams) {
+  const index = recipes.findIndex((item) => item.id === Number(routeParams.id))
+  if (index < 0) httpError(404, '菜谱不存在')
+  const payload = normalizeRecipePayload(parseBody(config))
+  const recipe = buildRecipe(recipes[index].id, payload)
+  recipes.splice(index, 1, recipe)
+  return recipe
+}
+
+// 删除菜谱：从内存数组移除
+function deleteRecipeHandler(config, routeParams) {
+  const index = recipes.findIndex((item) => item.id === Number(routeParams.id))
+  if (index < 0) httpError(404, '菜谱不存在')
+  const [removed] = recipes.splice(index, 1)
+  return { id: removed.id }
+}
+
+// 更新上下架状态
+function updateRecipeStatusHandler(config, routeParams) {
+  const recipe = recipes.find((item) => item.id === Number(routeParams.id))
+  if (!recipe) httpError(404, '菜谱不存在')
+  const body = parseBody(config)
+  recipe.status = Number(body.status) === 0 ? 0 : 1
+  return { id: recipe.id, status: recipe.status }
 }
 
 // ---------- 认证接口 handler（S2）----------
@@ -212,8 +366,14 @@ function getMeHandler(config) {
 // 路由表：method + 路径匹配；带 :id 的动态段由 findRoute 用正则匹配，其余接口随阶段补充
 const routes = [
   { method: 'get', path: '/recipes', handler: getRecipeListHandler },
+  { method: 'post', path: '/recipes', handler: createRecipeHandler },
   { method: 'get', path: '/recipes/:id', handler: getRecipeDetailHandler },
+  { method: 'put', path: '/recipes/:id', handler: updateRecipeHandler },
+  { method: 'delete', path: '/recipes/:id', handler: deleteRecipeHandler },
+  { method: 'put', path: '/recipes/:id/status', handler: updateRecipeStatusHandler },
   { method: 'post', path: '/recipes/:id/favorite', handler: toggleFavoriteHandler },
+  { method: 'get', path: '/categories', handler: getCategoriesHandler },
+  { method: 'get', path: '/ingredients', handler: getIngredientsHandler },
   { method: 'post', path: '/auth/login', handler: loginHandler },
   { method: 'get', path: '/auth/me', handler: getMeHandler },
 ]
