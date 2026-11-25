@@ -8,7 +8,6 @@ const FamilyLayout = () => import('@/layouts/FamilyLayout.vue')
 const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 
 // 页面统一懒加载：访问到该地址时才加载对应 chunk（S4 起逐步替换为真实页面组件）
-const PlaceholderPage = () => import('@/views/PlaceholderPage.vue')
 const LoginPage = () => import('@/views/login/index.vue')
 const NotFoundPage = () => import('@/views/NotFoundPage.vue')
 // 临时演示页：S3 用于验收公共组件，S5 起公共组件已在真实页面使用，演示页已删除
@@ -25,6 +24,11 @@ const ShoppingList = () => import('@/views/family/shopping/index.vue')
 // S8 数据统计 + 工作台
 const StatsBoard = () => import('@/views/family/stats/index.vue')
 const Dashboard = () => import('@/views/family/dashboard/index.vue')
+// S9 食材库存 + 家庭设置 + 管理端字典
+const Pantry = () => import('@/views/family/pantry/index.vue')
+const FamilySettings = () => import('@/views/family/settings/index.vue')
+const AdminCategories = () => import('@/views/admin/categories/index.vue')
+const AdminIngredients = () => import('@/views/admin/ingredients/index.vue')
 
 // 不需要登录即可访问的路由（具体放行逻辑在守卫里）
 export const constantRoutes = [
@@ -79,7 +83,7 @@ export const asyncRoutes = [
       {
         path: 'pantry',
         name: 'Pantry',
-        component: PlaceholderPage,
+        component: Pantry,
         meta: { title: '食材库存', icon: 'Box', roles: ['family'] },
       },
       {
@@ -91,7 +95,7 @@ export const asyncRoutes = [
       {
         path: 'settings',
         name: 'Settings',
-        component: PlaceholderPage,
+        component: FamilySettings,
         meta: { title: '家庭设置', icon: 'Setting', roles: ['family'] },
       },
     ],
@@ -118,13 +122,13 @@ export const asyncRoutes = [
       {
         path: 'categories',
         name: 'AdminCategories',
-        component: PlaceholderPage,
+        component: AdminCategories,
         meta: { title: '分类管理', icon: 'Grid', roles: ['admin'] },
       },
       {
         path: 'ingredients',
         name: 'AdminIngredients',
-        component: PlaceholderPage,
+        component: AdminIngredients,
         meta: { title: '食材字典', icon: 'Box', roles: ['admin'] },
       },
     ],

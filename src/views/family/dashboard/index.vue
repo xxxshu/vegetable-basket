@@ -1,9 +1,9 @@
 <!--
-  工作台（S8 概览版）
-  - 顶部 4 张卡片：已排餐数 / 本周预估 / 本周实际支出 / 临期食材
+  工作台（S8 概览版 + S9 预算/临期接入）
+  - 顶部 5 张卡片：已排餐数 / 本周预算 / 本周预估 / 本周实际支出 / 临期食材
   - 左侧：本周计划摘要（按天，点击跳一周计划）+ 近 4 周支出迷你折线
   - 右侧：待采购 Top5（点击跳采购清单）+ 临期提醒
-  - 说明：周预算、库存临期维护属于 S9（家庭设置 / 库存 CRUD），本页只读当前已有数据
+  - 说明：周预算来自家庭设置（S9），临期来自库存记录（S9 CRUD），本页只读汇总数据
 -->
 <script setup>
 import { computed, onMounted, ref } from 'vue'
@@ -67,43 +67,62 @@ const topPending = computed(() => overview.value?.topPending || [])
 // 临期食材：[{ name, display, expireAt, daysLeft }]
 const expiringItems = computed(() => overview.value?.expiringItems || [])
 
-// 4 张统计卡：value 已在 computed 里格式化好，模板只负责渲染
-const statCards = computed(() => [
-  {
-    key: 'meal',
-    label: '已排餐数',
-    value: `${overview.value?.mealPlanned ?? 0}`,
-    suffix: `/ ${overview.value?.mealTotal ?? 21}`,
-    hint: '本周 7 天 × 3 餐',
-    to: '/plan',
-  },
-  {
-    key: 'estimate',
-    label: '本周预估',
-    value: formatMoney(overview.value?.planEstimateFen || 0),
-    suffix: '',
-    hint: '按计划食材均价估算',
-    to: '/plan',
-  },
-  {
-    key: 'expense',
-    label: '本周实际支出',
-    value: formatMoney(overview.value?.actualExpenseFen || 0),
-    suffix: '',
-    // 支出卡片副标题直接展示采购状态，用户一眼知道下一步
-    hint: SHOPPING_STATUS_TEXT[overview.value?.shoppingStatus] || SHOPPING_STATUS_TEXT.none,
-    to: '/shopping',
-  },
-  {
-    key: 'expiring',
-    label: '临期食材',
-    value: `${overview.value?.expiringCount ?? 0} 项`,
-    suffix: '',
-    hint: '3 天内到期（库存管理 S9 上线后可维护）',
-    // 当前没有临期项时不跳转，避免点进"建设中"的库存页
-    to: expiringItems.value.length > 0 ? '/pantry' : '',
-  },
-])
+// 5 张统计卡：value 已在 computed 里格式化好，模板只负责渲染
+const statCards = computed(() => {
+  // 周预算（分）：来自家庭设置；null 表示还没配置
+  const budgetFen = overview.value?.budgetFen ?? null
+  // 已支出金额：用于算预算剩余
+  const actualExpenseFen = overview.value?.actualExpenseFen || 0
+
+  return [
+    {
+      key: 'meal',
+      label: '已排餐数',
+      value: `${overview.value?.mealPlanned ?? 0}`,
+      suffix: `/ ${overview.value?.mealTotal ?? 21}`,
+      hint: '本周 7 天 × 3 餐',
+      to: '/plan',
+    },
+    {
+      key: 'budget',
+      label: '本周预算',
+      // 未配置预算时给明确文案，不显示 ¥0 造成误解
+      value: budgetFen === null ? '未设置' : formatMoney(budgetFen),
+      suffix: '',
+      hint:
+        budgetFen === null
+          ? '去家庭设置配置周预算'
+          : `剩余 ${formatMoney(Math.max(budgetFen - actualExpenseFen, 0))}`,
+      to: '/settings',
+    },
+    {
+      key: 'estimate',
+      label: '本周预估',
+      value: formatMoney(overview.value?.planEstimateFen || 0),
+      suffix: '',
+      hint: '按计划食材均价估算',
+      to: '/plan',
+    },
+    {
+      key: 'expense',
+      label: '本周实际支出',
+      value: formatMoney(actualExpenseFen),
+      suffix: '',
+      // 支出卡片副标题直接展示采购状态，用户一眼知道下一步
+      hint: SHOPPING_STATUS_TEXT[overview.value?.shoppingStatus] || SHOPPING_STATUS_TEXT.none,
+      to: '/shopping',
+    },
+    {
+      key: 'expiring',
+      label: '临期食材',
+      value: `${overview.value?.expiringCount ?? 0} 项`,
+      suffix: '',
+      hint: '3 天内到期（可去食材库存页维护）',
+      // S9 库存页已实现：无论有没有临期都可以点进库存页查看/维护
+      to: '/pantry',
+    },
+  ]
+})
 
 // 近 4 周支出迷你折线：只保留实际支出一条线，去掉图例/标题，节省工作台空间
 const trendOption = computed(() => {
@@ -152,7 +171,7 @@ const trendOption = computed(() => {
     </template>
 
     <div class="dashboard">
-      <!-- 第一行：4 张统计卡（有 to 的卡片可点击跳转） -->
+      <!-- 第一行：5 张统计卡（有 to 的卡片可点击跳转） -->
       <div class="dashboard__cards">
         <article
           v-for="card in statCards"
@@ -252,7 +271,7 @@ const trendOption = computed(() => {
             </ul>
           </section>
 
-          <!-- 临期提醒：3 天内到期；库存管理属 S9，本页只读种子库存 -->
+          <!-- 临期提醒：3 天内到期；数据来自库存记录（S9 起可在库存页维护） -->
           <section class="panel">
             <header class="panel__header">
               <h3 class="panel__title">临期提醒</h3>
@@ -262,7 +281,9 @@ const trendOption = computed(() => {
             </header>
             <EmptyState
               v-if="!loading && expiringItems.length === 0"
-              description="暂无临期食材（库存管理将在 S9 上线）"
+              description="暂无临期食材（可去食材库存页录入/维护）"
+              action-text="去维护库存"
+              @action="go('/pantry')"
             />
             <ul v-else class="simple-list">
               <li v-for="item in expiringItems" :key="item.ingredientId" class="simple-list__item">
@@ -286,14 +307,20 @@ const trendOption = computed(() => {
   gap: $spacing-md;
 }
 
-// 统计卡行：宽屏 4 列，窄屏 2 列
+// 统计卡行：宽屏 5 列（S9 新增预算卡），中屏 3 列，窄屏 2 列
 .dashboard__cards {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: $spacing-md;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
+  .dashboard__cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
   .dashboard__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

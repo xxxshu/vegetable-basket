@@ -122,7 +122,7 @@ const trendOption = computed(() => {
   const labels = trend.value.map((row) => row.weekStart.slice(5))
   // 接口金额是分，坐标轴统一换成元（保留 2 位，tooltip 再用 formatMoney 还原成 ¥ 格式）
   const actualValues = trend.value.map((row) => Number(((row.actual || 0) / 100).toFixed(2)))
-  // 预算属于 S9：现在 mock 返回 null，只有真有预算数据时才追加预算虚线，避免画一条 0 值假线
+  // 预算来自家庭设置（S9 已接入）：有预算数据才追加预算虚线，避免画一条 0 值假线
   const hasBudget = trend.value.some((row) => row.budget !== null && row.budget !== undefined)
   const series = [
     {
@@ -312,7 +312,7 @@ const distributionOption = computed(() => ({
     <!-- 统计口径说明：答辩/面试时能逐条讲清"每个数字怎么来的" -->
     <div class="stats__hint">
       <span class="stats__hint-title">统计口径（当前范围：{{ currentRangeLabel }}）</span>
-      <span>① 支出趋势：每周「确认核算」写入的支出合计；预算线待 S9 家庭设置配置后自动显示。</span>
+      <span>① 支出趋势：每周「确认核算」写入的支出合计；预算虚线来自家庭设置里的周预算。</span>
       <span
         >② 营养摄入：范围内已排餐日期的日均摄入 vs 成年人日均推荐值（菜谱营养按每份 × 份数）。</span
       >

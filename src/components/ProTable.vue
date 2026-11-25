@@ -23,6 +23,8 @@ const props = defineProps({
   rowKey: { type: String, default: 'id' },
   // 空态文案
   emptyText: { type: String, default: '暂无数据' },
+  // 行样式类名：支持字符串或 el-table 的 ({ row, rowIndex }) 函数，用于整行高亮（如临期库存）
+  rowClassName: { type: [String, Function], default: '' },
 })
 
 // 表格状态：分页/加载/列表数据统一由 useTable 管理
@@ -57,7 +59,13 @@ defineExpose({ reload: getList })
 <template>
   <div class="pro-table">
     <!-- 表格：loading 遮罩 + 空态插槽 + 自定义列插槽 -->
-    <el-table v-loading="loading" :data="list" :row-key="rowKey" class="pro-table__table">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :row-key="rowKey"
+      :row-class-name="rowClassName"
+      class="pro-table__table"
+    >
       <!-- 按列配置渲染：配置了 slot 的列交给父组件同名插槽 -->
       <el-table-column
         v-for="column in columns"

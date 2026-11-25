@@ -200,17 +200,227 @@ function toggleFavoriteHandler(config, routeParams) {
   return { favorite: favoriteRecipeIds.has(recipeId) }
 }
 
-// ---------- 字典接口 handler（S5，管理端编辑页下拉用）----------
+// ---------- 字典接口 handler（S5 建立，S9 扩展管理端增删改）----------
 
-// 分类字典：可按 type 过滤（ingredient=食材品类 / method=烹饪方式）
+// 分类类型：ingredient=食材品类（菜谱分类/采购分组）、method=烹饪方式（菜谱做法）
+const CATEGORY_TYPES = ['ingredient', 'method']
+
+/**
+ * 分类查询：
+ * - 不传 page → 返回数组（菜谱筛选、编辑页下拉等字典场景，保持旧结构）
+ * - 传 page → 返回分页对象（管理端分类管理页 ProTable 用）
+ * @param {object} config axios 配置（params: type / keyword / page / pageSize）
+ */
 function getCategoriesHandler(config) {
-  const type = config.params?.type
-  return categories.filter((item) => (type ? item.type === type : true))
+  const params = config.params || {}
+  const type = params.type
+  const keyword = String(params.keyword || '').trim()
+
+  let list = categories.filter((item) => (type ? item.type === type : true))
+  if (keyword) list = list.filter((item) => item.name.includes(keyword))
+
+  if (params.page !== undefined && params.page !== '') return paginateList(list, params)
+  return list
 }
 
-// 食材字典：编辑页的食材下拉 + 后续聚合都从这里取
-function getIngredientsHandler() {
-  return ingredients
+// 分类重名校验：同一 type 下不允许重名（编辑时排除自己）
+function ensureCategoryNameUnique(name, type, excludeId) {
+  const duplicated = categories.some(
+    (item) => item.type === type && item.name === name && item.id !== Number(excludeId),
+  )
+  if (duplicated) businessError(400, `分类「${name}」已存在`)
+}
+
+// 生成分类 id：食材品类走 1-99 段、烹饪方式走 101+ 段，保持与种子数据风格一致
+function nextCategoryId(type) {
+  const sameType = categories.filter((item) => item.type === type)
+  const floor = type === 'method' ? 100 : 0
+  return sameType.reduce((max, item) => Math.max(max, item.id), floor) + 1
+}
+
+// 新增分类
+function createCategoryHandler(config) {
+  const body = parseBody(config)
+  const name = String(body.name || '').trim()
+  const type = String(body.type || '')
+  if (!name) businessError(400, '分类名称不能为空')
+  if (!CATEGORY_TYPES.includes(type)) businessError(400, '分类类型不合法')
+  ensureCategoryNameUnique(name, type)
+
+  const item = {
+    id: nextCategoryId(type),
+    name,
+    type,
+    sort: Math.max(0, Math.round(Number(body.sort) || 0)),
+  }
+  categories.push(item)
+  return item
+}
+
+// 编辑分类：类型不允许改（已有数据引用它）；烹饪方式改名时联动更新菜谱 method 字段
+function updateCategoryHandler(config, routeParams) {
+  const item = categories.find((row) => row.id === Number(routeParams.id))
+  if (!item) httpError(404, '分类不存在')
+
+  const body = parseBody(config)
+  if (body.type && body.type !== item.type) businessError(400, '分类类型创建后不可修改')
+
+  const name = String(body.name ?? item.name).trim()
+  if (!name) businessError(400, '分类名称不能为空')
+  ensureCategoryNameUnique(name, item.type, item.id)
+
+  // 烹饪方式在菜谱里以名称字符串存储（recipe.method），改名时要同步历史菜谱，避免数据对不上
+  if (item.type === 'method' && name !== item.name) {
+    recipes.forEach((recipe) => {
+      if (recipe.method === item.name) recipe.method = name
+    })
+  }
+  item.name = name
+  if (body.sort !== undefined) item.sort = Math.max(0, Math.round(Number(body.sort) || 0))
+  return item
+}
+
+// 删除分类：被食材/菜谱引用时拒绝，避免出现"分类不存在"的脏数据
+function deleteCategoryHandler(config, routeParams) {
+  const item = categories.find((row) => row.id === Number(routeParams.id))
+  if (!item) httpError(404, '分类不存在')
+
+  if (item.type === 'method') {
+    const used = recipes.some((recipe) => recipe.method === item.name)
+    if (used) businessError(400, '该烹饪方式已被菜谱使用，不能删除')
+  } else {
+    const usedByIngredient = ingredients.some((row) => row.categoryId === item.id)
+    const usedByRecipe = recipes.some((row) => row.categoryId === item.id)
+    if (usedByIngredient || usedByRecipe) businessError(400, '该品类下还有食材或菜谱，不能删除')
+  }
+
+  categories.splice(categories.indexOf(item), 1)
+  return { id: item.id }
+}
+
+/**
+ * 食材查询：
+ * - 不传 page → 返回数组（菜谱编辑/采购聚合等字典场景）
+ * - 传 page → 返回分页对象（管理端食材字典页 ProTable 用）
+ * 支持 keyword（名称/别名）与 categoryId 过滤；额外 join 出 categoryName 方便管理页展示。
+ */
+function getIngredientsHandler(config) {
+  const params = config.params || {}
+  const keyword = String(params.keyword || '').trim()
+  const categoryId =
+    params.categoryId === undefined || params.categoryId === '' ? null : Number(params.categoryId)
+
+  let list = ingredients
+  if (keyword) {
+    list = list.filter(
+      (item) =>
+        item.name.includes(keyword) ||
+        (item.aliases || []).some((alias) => alias.includes(keyword)),
+    )
+  }
+  if (categoryId !== null) list = list.filter((item) => item.categoryId === categoryId)
+
+  // join 品类名：管理端表格直接展示，字典调用方多一个字段也无影响
+  const rows = list.map((item) => ({
+    ...item,
+    categoryName: categories.find((category) => category.id === item.categoryId)?.name || '其他',
+  }))
+  if (params.page !== undefined && params.page !== '') return paginateList(rows, params)
+  return rows
+}
+
+// 食材重名校验
+function ensureIngredientNameUnique(name, excludeId) {
+  const duplicated = ingredients.some((item) => item.name === name && item.id !== Number(excludeId))
+  if (duplicated) businessError(400, `食材「${name}」已存在`)
+}
+
+// 别名归一：支持数组，也支持管理页输入的「逗号/顿号分隔字符串」
+function normalizeAliases(value) {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean)
+  if (typeof value === 'string') {
+    return value
+      .split(/[,，、]/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+// 校验并整理食材表单（新增/编辑共用）
+function normalizeIngredientPayload(body, currentItem) {
+  const name = String(body.name ?? currentItem?.name ?? '').trim()
+  if (!name) businessError(400, '食材名称不能为空')
+  ensureIngredientNameUnique(name, currentItem?.id)
+
+  const categoryId = Number(body.categoryId ?? currentItem?.categoryId)
+  const category = categories.find((item) => item.id === categoryId && item.type === 'ingredient')
+  if (!category) businessError(400, '请选择食材品类')
+
+  const unitBase = String(body.unitBase ?? currentItem?.unitBase ?? 'g')
+  if (!['g', 'ml', '个'].includes(unitBase)) businessError(400, '基准单位只能是 g / ml / 个')
+  // 已被菜谱引用的食材不能改基准单位：菜谱用量按旧单位存，改了口径会导致聚合结果错误
+  if (currentItem && unitBase !== currentItem.unitBase) {
+    const referenced = recipes.some((recipe) =>
+      recipe.ingredients.some((row) => row.ingredientId === currentItem.id),
+    )
+    if (referenced) businessError(400, '该食材已被菜谱引用，不能修改基准单位')
+  }
+
+  // 单价：每计价单位的价格（分）——g/ml 按每 1000 单位、个按每个
+  const pricePerUnit = Math.round(Number(body.pricePerUnit ?? currentItem?.pricePerUnit ?? 0))
+  if (!Number.isFinite(pricePerUnit) || pricePerUnit < 0) businessError(400, '单价不能为负数')
+
+  const shelfLifeDays = Math.round(Number(body.shelfLifeDays ?? currentItem?.shelfLifeDays ?? 7))
+  if (!(shelfLifeDays >= 1 && shelfLifeDays <= 3650)) {
+    businessError(400, '保质期需在 1-3650 天之间')
+  }
+
+  const aliases =
+    body.aliases === undefined ? currentItem?.aliases || [] : normalizeAliases(body.aliases)
+
+  return { name, categoryId, unitBase, pricePerUnit, aliases, shelfLifeDays }
+}
+
+// 新增食材（新食材默认没有历史引用，可以自由选基准单位）
+function createIngredientHandler(config) {
+  const payload = normalizeIngredientPayload(parseBody(config))
+  const item = { id: nextId(ingredients), ...payload }
+  ingredients.push(item)
+  return item
+}
+
+// 编辑食材
+function updateIngredientHandler(config, routeParams) {
+  const item = ingredients.find((row) => row.id === Number(routeParams.id))
+  if (!item) httpError(404, '食材不存在')
+  Object.assign(item, normalizeIngredientPayload(parseBody(config), item))
+  return item
+}
+
+// 删除食材：被菜谱 / 库存 / 采购核算引用时拒绝删除
+function deleteIngredientHandler(config, routeParams) {
+  const item = ingredients.find((row) => row.id === Number(routeParams.id))
+  if (!item) httpError(404, '食材不存在')
+
+  const usedByRecipe = recipes.some((recipe) =>
+    recipe.ingredients.some((row) => row.ingredientId === item.id),
+  )
+  if (usedByRecipe) businessError(400, '该食材已被菜谱使用，不能删除')
+  if (pantryItems.some((row) => row.ingredientId === item.id)) {
+    businessError(400, '该食材还有库存记录，请先删除库存')
+  }
+  const usedByShopping = shoppingLists.some((list) => {
+    const rows = list.groups.flatMap((group) => group.items)
+    return [...rows, ...list.unmergeableGroup.items].some((row) => row.ingredientId === item.id)
+  })
+  const usedByAccount = shoppingAccounts.some((account) =>
+    account.items.some((row) => row.ingredientId === item.id),
+  )
+  if (usedByShopping || usedByAccount) businessError(400, '该食材已被采购/核算清单使用，不能删除')
+
+  ingredients.splice(ingredients.indexOf(item), 1)
+  return { id: item.id }
 }
 
 // ---------- 菜谱 CRUD handler（S5，直接操作内存数组让增删改真的生效）----------
@@ -218,6 +428,21 @@ function getIngredientsHandler() {
 // 取列表里下一个可用 id（现有最大值 + 1）
 function nextId(list) {
   return list.reduce((max, item) => Math.max(max, item.id), 0) + 1
+}
+
+/**
+ * 通用分页：管理端列表接口传了 page 参数时返回分页对象，未传时由各 handler 返回完整数组
+ * （保持字典下拉接口 GET /categories、GET /ingredients 的旧返回结构不变）
+ * @param {object[]} list 完整列表
+ * @param {object} params 查询参数（page / pageSize）
+ * @returns {{ list: object[], total: number, page: number, pageSize: number }}
+ */
+function paginateList(list, params = {}) {
+  // 页码/每页条数都做兜底，非法值按第 1 页、每页 10 条处理
+  const page = Math.max(1, Number(params.page) || 1)
+  const pageSize = Math.max(1, Number(params.pageSize) || 10)
+  const start = (page - 1) * pageSize
+  return { list: list.slice(start, start + pageSize), total: list.length, page, pageSize }
 }
 
 // 取所有菜谱配方行 / 步骤行里的下一个可用 id（保证新增行不与旧行冲突）
@@ -552,6 +777,60 @@ function seedDemoExpenses() {
 }
 seedDemoExpenses()
 
+// ---------- 家庭设置 mock（S9）----------
+
+// 家庭设置：成员数 / 周预算（分）/ 忌口食材 / 常备调料
+// 默认常备调料沿用 S7 的 DEFAULT_PANTRY、忌口为空，保证"不改设置时采购清单结果与 S7 完全一致"
+const family = {
+  id: 1,
+  name: '我的家庭',
+  memberCount: 3,
+  weekBudgetFen: 40000, // 周预算（分）：默认 ¥400
+  preferences: [], // 忌口食材名称/别名（如「虾」，聚合时按别名归一）
+  defaultPantry: [...DEFAULT_PANTRY], // 常备调料名称/别名（默认过滤，不写进采购清单）
+}
+
+/**
+ * 把字符串数组去重并去掉空白项：设置页提交的忌口/常备调料都是名称数组
+ * @param {unknown} value 任意值
+ * @returns {string[]|null} 非法输入返回 null（表示本次不改该字段）
+ */
+function normalizeNameList(value) {
+  if (!Array.isArray(value)) return null
+  const names = value.map((item) => String(item).trim()).filter(Boolean)
+  return [...new Set(names)]
+}
+
+// 查询家庭设置：工作台预算卡、统计预算线、采购聚合都读它
+function getFamilyHandler() {
+  return family
+}
+
+// 保存家庭设置：只更新传入的字段；数值做范围校验，名称数组去重
+function updateFamilyHandler(config) {
+  const body = parseBody(config)
+
+  if (body.memberCount !== undefined) {
+    const memberCount = Math.round(Number(body.memberCount))
+    if (!(memberCount >= 1 && memberCount <= 10)) businessError(400, '家庭成员数需为 1-10')
+    family.memberCount = memberCount
+  }
+
+  if (body.weekBudgetFen !== undefined) {
+    const weekBudgetFen = Math.round(Number(body.weekBudgetFen))
+    if (!Number.isFinite(weekBudgetFen) || weekBudgetFen < 0) businessError(400, '周预算不能为负数')
+    family.weekBudgetFen = weekBudgetFen
+  }
+
+  const preferences = normalizeNameList(body.preferences)
+  if (preferences) family.preferences = preferences
+
+  const defaultPantry = normalizeNameList(body.defaultPantry)
+  if (defaultPantry) family.defaultPantry = defaultPantry
+
+  return family
+}
+
 const UNMERGEABLE_GROUP_NAME = '不可换算（按需购买）'
 
 // 种子库存：让「建议采购量」一进页面就能看到库存抵扣效果（土豆/番茄部分抵扣、鸡蛋完全覆盖）
@@ -578,9 +857,109 @@ function seedPantry() {
 }
 seedPantry()
 
-// 库存查询（S7 聚合抵扣用；S9 在此文件基础上扩展增删改页面与接口）
-function getPantryHandler() {
-  return pantryItems
+// 把库存行 join 上食材名称 / 品类 / 保质期，并算出"剩余天数"（负数表示已过期）
+function toPantryRow(item) {
+  const ingredient = ingredients.find((row) => row.id === item.ingredientId)
+  const category = categories.find((row) => row.id === ingredient?.categoryId)
+  const today = formatDate(new Date())
+  return {
+    id: item.id,
+    familyId: item.familyId,
+    ingredientId: item.ingredientId,
+    name: ingredient ? ingredient.name : '未知食材',
+    categoryId: ingredient?.categoryId ?? null,
+    categoryName: category?.name || '其他',
+    unitBase: ingredient?.unitBase || item.unit,
+    shelfLifeDays: ingredient?.shelfLifeDays ?? 0,
+    amount: item.amount,
+    unit: item.unit,
+    display: toDisplay(item.amount, item.unit),
+    boughtAt: item.boughtAt,
+    expireAt: item.expireAt,
+    // 剩余天数：到期日 - 今天（都是 00:00 的本地日期，除以一天毫秒数）
+    daysLeft: Math.round((parseDate(item.expireAt) - parseDate(today)) / 86400000),
+  }
+}
+
+/**
+ * 校验并整理库存表单（新增 / 编辑共用）
+ * 规则：食材必须存在；数量 > 0；单位必须能换算成食材基准单位（保证聚合抵扣可用）；
+ * 数量统一归一成整数最小单位（g/ml/个）；到期日缺省按「购买日 + 食材保质期」计算。
+ * @param {object} body 请求体
+ * @param {object} [currentItem] 编辑时的原记录（新增时为空）
+ * @returns {{ ingredientId:number, amount:number, unit:string, boughtAt:string, expireAt:string }}
+ */
+function normalizePantryPayload(body, currentItem) {
+  const ingredientId = Number(body.ingredientId ?? currentItem?.ingredientId)
+  const ingredient = ingredients.find((row) => row.id === ingredientId)
+  if (!ingredient) httpError(404, '食材不存在')
+
+  const rawAmount = body.amount === undefined ? currentItem?.amount : body.amount
+  const amount = Math.round(Number(rawAmount) || 0)
+  if (amount <= 0) businessError(400, '数量必须大于 0')
+
+  const rawUnit = body.unit ?? currentItem?.unit ?? ingredient.unitBase
+  if (!canMerge(rawUnit, ingredient.unitBase)) businessError(400, '单位与食材基准单位不可换算')
+  const normalized = normalize(amount, rawUnit)
+
+  const boughtAt = String(body.boughtAt ?? currentItem?.boughtAt ?? formatDate(new Date()))
+  const expireAt = String(
+    body.expireAt ?? currentItem?.expireAt ?? addDays(boughtAt, ingredient.shelfLifeDays || 7),
+  )
+  return {
+    ingredientId: ingredient.id,
+    amount: normalized.amount,
+    unit: normalized.unit,
+    boughtAt,
+    expireAt,
+  }
+}
+
+/**
+ * 库存查询：
+ * - 不传 page → 返回数组（S7 采购聚合抵扣用，保持旧结构）
+ * - 传 page → 返回分页对象（S9 库存页 ProTable 用）
+ * 支持 keyword（食材名）与 categoryId 过滤；按到期日升序（临期/过期优先展示）。
+ */
+function getPantryHandler(config) {
+  const params = config.params || {}
+  const keyword = String(params.keyword || '').trim()
+  const categoryId =
+    params.categoryId === undefined || params.categoryId === '' ? null : Number(params.categoryId)
+
+  let rows = pantryItems.map(toPantryRow)
+  if (keyword) rows = rows.filter((row) => row.name.includes(keyword))
+  if (categoryId !== null) rows = rows.filter((row) => row.categoryId === categoryId)
+
+  // 到期日升序：快过期的排在前面，库存页一眼能看到要优先吃的食材
+  rows.sort((a, b) => a.expireAt.localeCompare(b.expireAt) || a.id - b.id)
+
+  if (params.page !== undefined && params.page !== '') return paginateList(rows, params)
+  return rows
+}
+
+// 新增库存：同一食材不同批次分行记录（各自有购买日/到期日）
+function createPantryHandler(config) {
+  const payload = normalizePantryPayload(parseBody(config))
+  const item = { id: pantrySeedId++, familyId: 1, ...payload }
+  pantryItems.push(item)
+  return toPantryRow(item)
+}
+
+// 编辑库存：只允许改数量 / 单位 / 购买日 / 到期日（食材不变）
+function updatePantryHandler(config, routeParams) {
+  const item = pantryItems.find((row) => row.id === Number(routeParams.id))
+  if (!item) httpError(404, '库存记录不存在')
+  Object.assign(item, normalizePantryPayload(parseBody(config), item))
+  return toPantryRow(item)
+}
+
+// 删除库存
+function deletePantryHandler(config, routeParams) {
+  const index = pantryItems.findIndex((row) => row.id === Number(routeParams.id))
+  if (index < 0) httpError(404, '库存记录不存在')
+  const [removed] = pantryItems.splice(index, 1)
+  return { id: removed.id }
 }
 
 // 组装聚合引擎的输入：mock 端从"后端数据"直接构建（前端则通过接口拼装，两边都喂给同一个纯函数）
@@ -628,13 +1007,14 @@ function buildShoppingInput(weekStart) {
     categories: categories
       .filter((item) => item.type === 'ingredient')
       .map((item) => ({ id: item.id, name: item.name })),
-    defaultPantry: DEFAULT_PANTRY,
+    // 常备调料 / 忌口来自家庭设置（S9）：设置默认值等于 S7 的 DEFAULT_PANTRY + 空忌口
+    defaultPantry: family.defaultPantry,
     stock: pantryItems.map((row) => ({
       ingredientId: row.ingredientId,
       amount: row.amount,
       unit: row.unit,
     })),
-    preferences: [],
+    preferences: family.preferences,
   }
 }
 
@@ -1149,7 +1529,7 @@ function getStatsOverviewHandler(config) {
     rows.slice(0, 5).forEach((item) => topPending.push({ name: item.name, display: item.display }))
   }
 
-  // 临期库存：到期日在「今天 ~ 今天 + 3 天」之间（含今天）；S9 库存 CRUD 后由用户维护
+  // 临期库存：到期日在「今天 ~ 今天 + 3 天」之间（含今天）；库存记录由库存页维护
   const today = formatDate(new Date())
   const expiringItems = pantryItems
     .filter((item) => item.expireAt >= today && item.expireAt <= addDays(today, 3))
@@ -1190,8 +1570,8 @@ function getStatsOverviewHandler(config) {
     mealTotal: 21,
     planEstimateFen,
     actualExpenseFen,
-    // 周预算属于 S9 家庭设置，S8 不提前实现：返回 null，页面显示"待 S9 配置"
-    budgetFen: null,
+    // 周预算来自家庭设置（S9 接入）：工作台预算卡 / 剩余预算都读这个字段
+    budgetFen: family.weekBudgetFen,
     shoppingStatus,
     pendingShoppingCount: list ? list.summary.itemCount : 0,
     topPending,
@@ -1202,7 +1582,7 @@ function getStatsOverviewHandler(config) {
   }
 }
 
-// 支出趋势：按周汇总 expenses（金额单位：分）；budget 在 S9 接入家庭设置前固定为 null
+// 支出趋势：按周汇总 expenses（金额单位：分）；budget 取家庭设置周预算（S9 接入）
 function getExpenseTrendHandler(config) {
   const weeks = normalizeWeeks(config.params?.weeks ?? 8)
   return getRecentWeekStarts(weeks).map((weekStart) => {
@@ -1210,7 +1590,8 @@ function getExpenseTrendHandler(config) {
     const actual = expenses
       .filter((row) => isDateInWeek(row.date, weekStart))
       .reduce((sum, row) => sum + row.amountFen, 0)
-    return { weekStart, budget: null, actual }
+    // 预算按"当前家庭周预算"平铺展示（历史周没有单独快照，演示场景够用）
+    return { weekStart, budget: family.weekBudgetFen, actual }
   })
 }
 
@@ -1343,13 +1724,22 @@ const routes = [
   { method: 'put', path: '/recipes/:id/status', handler: updateRecipeStatusHandler },
   { method: 'post', path: '/recipes/:id/favorite', handler: toggleFavoriteHandler },
   { method: 'get', path: '/categories', handler: getCategoriesHandler },
+  { method: 'post', path: '/categories', handler: createCategoryHandler },
+  { method: 'put', path: '/categories/:id', handler: updateCategoryHandler },
+  { method: 'delete', path: '/categories/:id', handler: deleteCategoryHandler },
   { method: 'get', path: '/ingredients', handler: getIngredientsHandler },
+  { method: 'post', path: '/ingredients', handler: createIngredientHandler },
+  { method: 'put', path: '/ingredients/:id', handler: updateIngredientHandler },
+  { method: 'delete', path: '/ingredients/:id', handler: deleteIngredientHandler },
   { method: 'get', path: '/plans', handler: getPlanHandler },
   { method: 'post', path: '/plans/items', handler: addPlanItemHandler },
   { method: 'put', path: '/plans/items/:id', handler: updatePlanItemHandler },
   { method: 'delete', path: '/plans/items/:id', handler: deletePlanItemHandler },
   { method: 'post', path: '/plans/copy', handler: copyPlanHandler },
   { method: 'get', path: '/pantry', handler: getPantryHandler },
+  { method: 'post', path: '/pantry', handler: createPantryHandler },
+  { method: 'put', path: '/pantry/:id', handler: updatePantryHandler },
+  { method: 'delete', path: '/pantry/:id', handler: deletePantryHandler },
   { method: 'get', path: '/shopping', handler: getShoppingHandler },
   { method: 'post', path: '/shopping/generate', handler: generateShoppingHandler },
   { method: 'post', path: '/shopping/items', handler: addShoppingItemHandler },
@@ -1371,6 +1761,9 @@ const routes = [
   },
   { method: 'post', path: '/shopping/account/:id/confirm', handler: confirmShoppingAccountHandler },
   { method: 'get', path: '/expenses', handler: getExpensesHandler },
+  // S9 家庭设置：成员数 / 周预算 / 忌口 / 常备调料
+  { method: 'get', path: '/family', handler: getFamilyHandler },
+  { method: 'put', path: '/family', handler: updateFamilyHandler },
   // S8 数据统计：5 个只读统计接口
   { method: 'get', path: '/stats/overview', handler: getStatsOverviewHandler },
   { method: 'get', path: '/stats/expense-trend', handler: getExpenseTrendHandler },

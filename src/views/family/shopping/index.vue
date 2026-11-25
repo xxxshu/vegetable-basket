@@ -12,6 +12,7 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { getCategories, getIngredients } from '@/api/dict'
+import { getFamily } from '@/api/family'
 import { getPantry } from '@/api/pantry'
 import { getPlan } from '@/api/plan'
 import { getRecipeDetail } from '@/api/recipe'
@@ -19,7 +20,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import PageContainer from '@/components/PageContainer.vue'
 import { useShoppingStore } from '@/stores'
 import { aggregateShoppingList } from '@/utils/aggregate'
-import { DEFAULT_PANTRY, UNITS } from '@/utils/constants'
+import { UNITS } from '@/utils/constants'
 import { addDays, formatWeekRange, getWeekStart } from '@/utils/date'
 import { exportElementToPdf } from '@/utils/exportPdf'
 import { formatMoney } from '@/utils/format'
@@ -105,11 +106,12 @@ async function loadPreview() {
     planItemCount.value = plan.items.length
     if (plan.items.length === 0) return
 
-    // 字典与库存并行请求
-    const [ingredientList, categoryList, stockList] = await Promise.all([
+    // 字典、库存、家庭设置并行请求：库存用于抵扣，家庭设置提供忌口与常备调料
+    const [ingredientList, categoryList, stockList, familySetting] = await Promise.all([
       getIngredients(),
       getCategories({ type: 'ingredient' }),
       getPantry(),
+      getFamily(),
     ])
 
     // 计划里涉及的菜谱去重后批量拿详情（详情里有配方行）
@@ -150,13 +152,14 @@ async function loadPreview() {
       recipeMap,
       ingredientMap,
       categories: categoryList.map((item) => ({ id: item.id, name: item.name })),
-      defaultPantry: DEFAULT_PANTRY,
+      // 常备调料 / 忌口来自家庭设置（S9）：与 mock 后端生成清单时读取的是同一份设置
+      defaultPantry: familySetting.defaultPantry,
       stock: stockList.map((row) => ({
         ingredientId: row.ingredientId,
         amount: row.amount,
         unit: row.unit,
       })),
-      preferences: [],
+      preferences: familySetting.preferences,
     }
   } catch {
     // 预览失败不阻塞清单展示，只是没有预览数据
