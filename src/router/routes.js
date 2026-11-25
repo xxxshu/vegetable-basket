@@ -1,17 +1,18 @@
 // 完整路由表（对应 docs/开发文档.md 6.1 节）
 // 设计：S2 起采用「动态注册」——登录页先注册，业务路由登录后按角色过滤再 addRoute；
 // 未注册的地址在路由层面根本不存在，比 v-if 隐藏菜单更安全。
-import { h } from 'vue'
-import { RouterView } from 'vue-router'
+// S3 起：'/' 与 '/admin' 已指向真实布局（FamilyLayout / AdminLayout）。
 
-// S2 临时布局外壳：只渲染 <router-view />，让 6.1 的「布局 → 子页面」结构先跑通。
-// S3 会把这里替换成真实的 FamilyLayout / AdminLayout（顶部导航 / 侧边菜单在布局里实现）。
-const RouterShell = { name: 'RouterShell', render: () => h(RouterView) }
+// 布局组件懒加载：只有进入该布局时才加载对应 chunk
+const FamilyLayout = () => import('@/layouts/FamilyLayout.vue')
+const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 
-// 页面统一懒加载：访问到该地址时才加载对应 chunk（S3 起逐步替换为真实页面组件）
+// 页面统一懒加载：访问到该地址时才加载对应 chunk（S4 起逐步替换为真实页面组件）
 const PlaceholderPage = () => import('@/views/PlaceholderPage.vue')
 const LoginPage = () => import('@/views/login/index.vue')
 const NotFoundPage = () => import('@/views/NotFoundPage.vue')
+// 临时演示页：仅用于 S3 验收公共组件，S4/S5 真实页面接入后删除
+const DemoPage = () => import('@/views/DemoPage.vue')
 
 // 不需要登录即可访问的路由（具体放行逻辑在守卫里）
 export const constantRoutes = [
@@ -28,7 +29,7 @@ export const asyncRoutes = [
   {
     path: '/',
     name: 'FamilyRoot',
-    component: RouterShell,
+    component: FamilyLayout,
     redirect: '/dashboard',
     meta: { roles: ['family', 'admin'] },
     children: [
@@ -81,12 +82,19 @@ export const asyncRoutes = [
         component: PlaceholderPage,
         meta: { title: '家庭设置', icon: 'Setting', roles: ['family'] },
       },
+      {
+        // 临时演示页（隐藏菜单）：S3 验收公共组件用
+        path: 'demo',
+        name: 'ComponentDemo',
+        component: DemoPage,
+        meta: { title: '组件演示', roles: ['family', 'admin'], hidden: true },
+      },
     ],
   },
   {
     path: '/admin',
     name: 'AdminRoot',
-    component: RouterShell,
+    component: AdminLayout,
     redirect: '/admin/recipes',
     meta: { roles: ['admin'] },
     children: [
@@ -94,7 +102,7 @@ export const asyncRoutes = [
         path: 'recipes',
         name: 'AdminRecipes',
         component: PlaceholderPage,
-        meta: { title: '菜谱管理', roles: ['admin'] },
+        meta: { title: '菜谱管理', icon: 'Dish', roles: ['admin'] },
       },
       {
         path: 'recipes/edit/:id?',
@@ -106,13 +114,13 @@ export const asyncRoutes = [
         path: 'categories',
         name: 'AdminCategories',
         component: PlaceholderPage,
-        meta: { title: '分类管理', roles: ['admin'] },
+        meta: { title: '分类管理', icon: 'Grid', roles: ['admin'] },
       },
       {
         path: 'ingredients',
         name: 'AdminIngredients',
         component: PlaceholderPage,
-        meta: { title: '食材字典', roles: ['admin'] },
+        meta: { title: '食材字典', icon: 'Box', roles: ['admin'] },
       },
     ],
   },

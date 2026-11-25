@@ -29,20 +29,19 @@ const currentPath = computed(() => route.fullPath)
       <p class="placeholder__desc">路由、登录与权限已打通，页面内容将在后续阶段实现。</p>
 
       <!-- 阶段提示：标明当前进度 -->
-      <p class="placeholder__hint">阶段 2：路由 + 登录 + 权限</p>
+      <p class="placeholder__hint">页面建设中，后续阶段将逐步实现真实内容</p>
     </section>
   </main>
 </template>
 
 <style scoped lang="scss">
-// 整页容器：占满视口并让卡片居中；padding 用全局 Sass 变量
+// 整页容器：在布局内容区里占位，不再撑满整个视口
 .placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 60vh;
   padding: $spacing-lg;
-  background-color: $bg-page;
 }
 
 // 占位卡片：白底 + 大圆角 + 阴影，与登录卡保持同一套视觉语言
