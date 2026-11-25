@@ -22,6 +22,9 @@ const AdminRecipeEdit = () => import('@/views/admin/recipes/edit.vue')
 const MealPlan = () => import('@/views/family/plan/index.vue')
 // S7 采购清单
 const ShoppingList = () => import('@/views/family/shopping/index.vue')
+// S8 数据统计 + 工作台
+const StatsBoard = () => import('@/views/family/stats/index.vue')
+const Dashboard = () => import('@/views/family/dashboard/index.vue')
 
 // 不需要登录即可访问的路由（具体放行逻辑在守卫里）
 export const constantRoutes = [
@@ -45,7 +48,7 @@ export const asyncRoutes = [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: PlaceholderPage,
+        component: Dashboard,
         meta: { title: '工作台', icon: 'Odometer', roles: ['family', 'admin'] },
       },
       {
@@ -82,7 +85,7 @@ export const asyncRoutes = [
       {
         path: 'stats',
         name: 'Stats',
-        component: PlaceholderPage,
+        component: StatsBoard,
         meta: { title: '数据统计', icon: 'TrendCharts', roles: ['family', 'admin'] },
       },
       {

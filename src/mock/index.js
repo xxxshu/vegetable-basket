@@ -10,7 +10,7 @@ import { AxiosError } from 'axios'
 
 import { aggregateShoppingList } from '@/utils/aggregate'
 import { DEFAULT_PANTRY } from '@/utils/constants'
-import { addDays, formatDate, getWeekStart, parseDate } from '@/utils/date'
+import { addDays, formatDate, getWeekStart, getWeekdayLabel, parseDate } from '@/utils/date'
 import { deepClone } from '@/utils/deepClone'
 import { canMerge, normalize, toDisplay } from '@/utils/unit'
 
@@ -531,6 +531,27 @@ let shoppingAccountSeedId = 1
 let shoppingAccountItemSeedId = 1
 let expenseSeedId = 1
 
+// 演示用历史支出种子（S8 统计图表用）：预置近 7 周支出，让「近 4 / 近 8 周支出趋势」一进页面就有数据。
+// 注意：当前周不预置，保留 S7「确认核算后才写支出」的验收路径（当前周支出 = 0，确认核算后再 +1 条）。
+const EXPENSE_DEMO_AMOUNTS = [28600, 31250, 25800, 30120, 27400, 29500, 26300]
+
+// 生成历史支出：index=0 表示上一周（周日在周内核算），依次往前推 7 周
+function seedDemoExpenses() {
+  const currentWeekStart = getWeekStart(new Date())
+  EXPENSE_DEMO_AMOUNTS.forEach((amountFen, index) => {
+    const weekStart = addDays(currentWeekStart, -(index + 1) * 7)
+    expenses.push({
+      id: expenseSeedId++,
+      familyId: 1,
+      date: addDays(weekStart, 6),
+      amountFen,
+      note: `采购核算 ${weekStart}`,
+      categoryId: null,
+    })
+  })
+}
+seedDemoExpenses()
+
 const UNMERGEABLE_GROUP_NAME = '不可换算（按需购买）'
 
 // 种子库存：让「建议采购量」一进页面就能看到库存抵扣效果（土豆/番茄部分抵扣、鸡蛋完全覆盖）
@@ -1049,6 +1070,239 @@ function getExpensesHandler() {
   return expenses
 }
 
+// ---------- 统计接口 mock（S8）----------
+// 数据来源：expenses（S7 确认核算写入）+ plans/planItems（一周计划）+ recipes（菜谱营养）；
+// 所有 handler 只读内存数据，不改任何业务状态。
+
+// 营养摄入的参考值：成年人日均推荐量（演示用固定标准，不属于 S9 家庭偏好）
+const NUTRITION_RECOMMEND = { protein: 60, fat: 60, carb: 300, fiber: 25, sodium: 2000 }
+// 与菜谱 nutrition 字段一一对应；数组顺序也是雷达图轴的顺序
+const NUTRITION_KEYS = ['protein', 'fat', 'carb', 'fiber', 'sodium']
+
+/**
+ * 把 weeks 参数夹到 1–8 周：URL 参数都是字符串，非法值回退到默认 4 周（统计页默认"近 4 周"）
+ * @param {unknown} value 查询参数
+ * @returns {number} 合法周数
+ */
+function normalizeWeeks(value) {
+  const weeks = Math.round(Number(value) || 4)
+  return Math.max(1, Math.min(8, weeks))
+}
+
+/**
+ * 生成「截止本周」的连续 weekStart 列表：近 4 周 → [3 周前的周一, …, 本周周一]
+ * @param {number} weeks 周数
+ * @returns {string[]} 周一日期列表（升序）
+ */
+function getRecentWeekStarts(weeks) {
+  const currentWeekStart = getWeekStart(new Date())
+  return Array.from({ length: weeks }, (_, index) =>
+    addDays(currentWeekStart, (index - (weeks - 1)) * 7),
+  )
+}
+
+/**
+ * 判断日期是否落在某一周（周一 ~ 周日）；日期都是 YYYY-MM-DD 字符串，可以直接比较大小
+ * @param {string} date 日期
+ * @param {string} weekStart 周一日期
+ * @returns {boolean}
+ */
+function isDateInWeek(date, weekStart) {
+  return date >= weekStart && date <= addDays(weekStart, 6)
+}
+
+// 工作台概览：本周计划 / 支出 / 采购状态 / 待采购 Top5 / 临期库存 / 按天摘要
+function getStatsOverviewHandler(config) {
+  const weekStart = String(config.params?.weekStart || getWeekStart(new Date()))
+  const plan = plans.find((item) => item.weekStart === weekStart)
+  const items = plan ? planItems.filter((item) => item.planId === plan.id) : []
+
+  // 卡片 1：已排餐数（本周 7 天 × 3 餐，mealTotal 固定 21 供页面显示分母）
+  const mealPlanned = items.length
+
+  // 卡片 2：本周计划预估金额 = Σ（每份成本 × 份数），全程整数分
+  const planEstimateFen = items.reduce((sum, item) => {
+    const recipe = recipes.find((row) => row.id === item.recipeId)
+    return sum + (recipe ? calcRecipeCostFenByServing(recipe) * item.servings : 0)
+  }, 0)
+
+  // 卡片 3：本周已确认核算的实际支出（没有确认核算就是 0）
+  const actualExpenseFen = expenses
+    .filter((row) => isDateInWeek(row.date, weekStart))
+    .reduce((sum, row) => sum + row.amountFen, 0)
+
+  // 采购 / 核算状态：给工作台展示"下一步该做什么"（none → draft → confirmed → account-draft → done）
+  const list = shoppingLists.find((item) => item.weekStart === weekStart)
+  const account = shoppingAccounts.find((item) => item.weekStart === weekStart)
+  let shoppingStatus = 'none'
+  if (list) shoppingStatus = list.status === 'confirmed' ? 'confirmed' : 'draft'
+  if (account) shoppingStatus = account.status === 'done' ? 'done' : 'account-draft'
+
+  // 待采购 Top5：有采购清单时按预估金额降序取前 5；
+  // 沿用采购清单页口径：只展示食材与分量，不展示金额（priceFen 仅用于排序）
+  const topPending = []
+  if (list) {
+    const rows = []
+    list.groups.forEach((group) => rows.push(...group.items))
+    rows.push(...list.unmergeableGroup.items)
+    rows.sort((a, b) => b.priceFen - a.priceFen)
+    rows.slice(0, 5).forEach((item) => topPending.push({ name: item.name, display: item.display }))
+  }
+
+  // 临期库存：到期日在「今天 ~ 今天 + 3 天」之间（含今天）；S9 库存 CRUD 后由用户维护
+  const today = formatDate(new Date())
+  const expiringItems = pantryItems
+    .filter((item) => item.expireAt >= today && item.expireAt <= addDays(today, 3))
+    .map((item) => {
+      const ingredient = ingredients.find((row) => row.id === item.ingredientId)
+      return {
+        ingredientId: item.ingredientId,
+        name: ingredient ? ingredient.name : '未知食材',
+        display: toDisplay(item.amount, item.unit),
+        expireAt: item.expireAt,
+        // 剩余天数：两个 00:00 的本地日期相减，除以一天的毫秒数；用 Math.round 规避夏令时误差
+        daysLeft: Math.round((parseDate(item.expireAt) - parseDate(today)) / 86400000),
+      }
+    })
+
+  // 本周计划摘要：固定返回 7 天，工作台按天展示；meals 只带餐次 + 菜名，点击整行跳一周计划
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = addDays(weekStart, index)
+    const dayItems = items.filter((item) => item.date === date)
+    // 同一天内按 早餐 → 午餐 → 晚餐 排序，和一周计划页保持一致
+    dayItems.sort(
+      (a, b) => (MEAL_ORDER[a.mealType] ?? 0) - (MEAL_ORDER[b.mealType] ?? 0) || a.id - b.id,
+    )
+    return {
+      date,
+      weekday: getWeekdayLabel(date),
+      mealCount: dayItems.length,
+      meals: dayItems.map((item) => ({
+        mealType: item.mealType,
+        title: recipes.find((row) => row.id === item.recipeId)?.title || '菜谱已删除',
+      })),
+    }
+  })
+
+  return {
+    weekStart,
+    mealPlanned,
+    mealTotal: 21,
+    planEstimateFen,
+    actualExpenseFen,
+    // 周预算属于 S9 家庭设置，S8 不提前实现：返回 null，页面显示"待 S9 配置"
+    budgetFen: null,
+    shoppingStatus,
+    pendingShoppingCount: list ? list.summary.itemCount : 0,
+    topPending,
+    expiringCount: expiringItems.length,
+    expiringItems,
+    days,
+    recipeCount: recipes.filter((row) => row.status === 1).length,
+  }
+}
+
+// 支出趋势：按周汇总 expenses（金额单位：分）；budget 在 S9 接入家庭设置前固定为 null
+function getExpenseTrendHandler(config) {
+  const weeks = normalizeWeeks(config.params?.weeks ?? 8)
+  return getRecentWeekStarts(weeks).map((weekStart) => {
+    // 该周内的支出合计（核算日期落在本周）
+    const actual = expenses
+      .filter((row) => isDateInWeek(row.date, weekStart))
+      .reduce((sum, row) => sum + row.amountFen, 0)
+    return { weekStart, budget: null, actual }
+  })
+}
+
+// 营养摄入：统计范围内「已排餐日」的日均营养 vs 成年人日均推荐值
+function getNutritionHandler(config) {
+  const weeks = normalizeWeeks(config.params?.weeks)
+  const weekStarts = getRecentWeekStarts(weeks)
+  // 范围内的计划项：先按 weekStart 找到计划 id，再筛出计划项
+  const planIds = plans.filter((plan) => weekStarts.includes(plan.weekStart)).map((plan) => plan.id)
+  const items = planItems.filter((item) => planIds.includes(item.planId))
+  // 范围内没有排餐：返回 null，页面显示空态（不画空雷达图）
+  if (items.length === 0) return null
+
+  const totals = { protein: 0, fat: 0, carb: 0, fiber: 0, sodium: 0 }
+  // 只统计"排过餐的日期"：范围内可能只有 1 周有数据，用范围总天数做分母会把均值拉得很低
+  const mealDates = new Set()
+  items.forEach((item) => {
+    const recipe = recipes.find((row) => row.id === item.recipeId)
+    if (!recipe) return
+    mealDates.add(item.date)
+    // 菜谱营养字段按「每份」存，× 份数才是一餐的总摄入
+    NUTRITION_KEYS.forEach((key) => {
+      totals[key] += (Number(recipe[key]) || 0) * (Number(item.servings) || 0)
+    })
+  })
+
+  const dayCount = mealDates.size || 1
+  const nutrition = {}
+  NUTRITION_KEYS.forEach((key) => {
+    nutrition[key] = {
+      // 日均保留 1 位小数（g / mg 都不需要更高精度）
+      actual: Math.round((totals[key] / dayCount) * 10) / 10,
+      recommend: NUTRITION_RECOMMEND[key],
+    }
+  })
+  return nutrition
+}
+
+// 品类占比：食材品类维度的金额（单位：分）
+// 口径：优先用范围内已确认核算的实际金额；没有核算数据时回退为计划聚合的预估金额
+function getCategoryShareHandler(config) {
+  const weeks = normalizeWeeks(config.params?.weeks)
+  const weekStarts = getRecentWeekStarts(weeks)
+  const categoryAmount = new Map()
+
+  // 1) 优先取范围内已确认核算的清单项（实际金额，最准确）
+  const doneAccounts = shoppingAccounts.filter(
+    (account) => account.status === 'done' && weekStarts.includes(account.weekStart),
+  )
+  doneAccounts.forEach((account) => {
+    account.items.forEach((item) => {
+      const ingredient = ingredients.find((row) => row.id === item.ingredientId)
+      const category = categories.find((row) => row.id === ingredient?.categoryId)
+      if (!category) return
+      categoryAmount.set(
+        category.name,
+        (categoryAmount.get(category.name) || 0) + (Number(item.priceFen) || 0),
+      )
+    })
+  })
+
+  // 2) 回退：按计划预估金额（复用 S7 的 8 步聚合纯函数，不重复实现计价逻辑）
+  if (doneAccounts.length === 0) {
+    weekStarts.forEach((weekStart) => {
+      const aggregation = buildShoppingAggregation(weekStart)
+      aggregation.groups.forEach((group) => {
+        const amount = group.items.reduce((sum, item) => sum + item.priceFen, 0)
+        if (amount > 0)
+          categoryAmount.set(
+            group.categoryName,
+            (categoryAmount.get(group.categoryName) || 0) + amount,
+          )
+      })
+    })
+  }
+
+  return [...categoryAmount.entries()]
+    .map(([categoryName, amount]) => ({ categoryName, amount }))
+    .sort((a, b) => b.amount - a.amount)
+}
+
+// 菜谱分布：上架菜谱按烹饪方式统计数量（全库口径，不随时间范围变化）
+function getRecipeDistributionHandler() {
+  const counter = new Map()
+  recipes
+    .filter((recipe) => recipe.status === 1)
+    .forEach((recipe) => counter.set(recipe.method, (counter.get(recipe.method) || 0) + 1))
+  return [...counter.entries()]
+    .map(([method, count]) => ({ method, count }))
+    .sort((a, b) => b.count - a.count)
+}
+
 // ---------- 认证接口 handler（S2）----------
 
 // 登录：校验用户名/密码/账号状态，成功后返回 token + 用户信息
@@ -1117,6 +1371,12 @@ const routes = [
   },
   { method: 'post', path: '/shopping/account/:id/confirm', handler: confirmShoppingAccountHandler },
   { method: 'get', path: '/expenses', handler: getExpensesHandler },
+  // S8 数据统计：5 个只读统计接口
+  { method: 'get', path: '/stats/overview', handler: getStatsOverviewHandler },
+  { method: 'get', path: '/stats/expense-trend', handler: getExpenseTrendHandler },
+  { method: 'get', path: '/stats/nutrition', handler: getNutritionHandler },
+  { method: 'get', path: '/stats/category-share', handler: getCategoryShareHandler },
+  { method: 'get', path: '/stats/recipe-distribution', handler: getRecipeDistributionHandler },
   { method: 'post', path: '/auth/login', handler: loginHandler },
   { method: 'get', path: '/auth/me', handler: getMeHandler },
 ]
